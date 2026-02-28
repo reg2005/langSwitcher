@@ -70,18 +70,37 @@ jobs:
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Upload arm64 App
-      uses: actions/upload-artifact@v4
-      with:
-        name: LangSwitcher-arm64-app
-        path: build/Build/Products/Release/LangSwitcher.app
-        if-no-files-found: error
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
+    - name: Create ZIP with ditto (preserves permissions)
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-arm64.zip"
 
     - name: Upload arm64 DMG
       uses: actions/upload-artifact@v4
       with:
         name: LangSwitcher-arm64-dmg
         path: "*.dmg"
+        if-no-files-found: error
+
+    - name: Upload arm64 ZIP
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-arm64-zip
+        path: "*.zip"
+        if-no-files-found: error
 
   build-x86_64:
     name: Build (Intel)
@@ -125,18 +144,37 @@ jobs:
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Upload x86_64 App
-      uses: actions/upload-artifact@v4
-      with:
-        name: LangSwitcher-x86_64-app
-        path: build/Build/Products/Release/LangSwitcher.app
-        if-no-files-found: error
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
+    - name: Create ZIP with ditto (preserves permissions)
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-x86_64.zip"
 
     - name: Upload x86_64 DMG
       uses: actions/upload-artifact@v4
       with:
         name: LangSwitcher-x86_64-dmg
         path: "*.dmg"
+        if-no-files-found: error
+
+    - name: Upload x86_64 ZIP
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-x86_64-zip
+        path: "*.zip"
+        if-no-files-found: error
 
   build-universal:
     name: Build (Universal)
@@ -180,18 +218,37 @@ jobs:
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Upload Universal App
-      uses: actions/upload-artifact@v4
-      with:
-        name: LangSwitcher-universal-app
-        path: build/Build/Products/Release/LangSwitcher.app
-        if-no-files-found: error
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
+    - name: Create ZIP with ditto (preserves permissions)
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-universal.zip"
 
     - name: Upload Universal DMG
       uses: actions/upload-artifact@v4
       with:
         name: LangSwitcher-universal-dmg
         path: "*.dmg"
+        if-no-files-found: error
+
+    - name: Upload Universal ZIP
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-universal-zip
+        path: "*.zip"
+        if-no-files-found: error
 
   release:
     name: Create Release
@@ -206,19 +263,37 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: LangSwitcher-arm64-dmg
-        path: dmgs/
+        path: release/
 
     - name: Download x86_64 DMG
       uses: actions/download-artifact@v4
       with:
         name: LangSwitcher-x86_64-dmg
-        path: dmgs/
+        path: release/
 
     - name: Download Universal DMG
       uses: actions/download-artifact@v4
       with:
         name: LangSwitcher-universal-dmg
-        path: dmgs/
+        path: release/
+
+    - name: Download arm64 ZIP
+      uses: actions/download-artifact@v4
+      with:
+        name: LangSwitcher-arm64-zip
+        path: release/
+
+    - name: Download x86_64 ZIP
+      uses: actions/download-artifact@v4
+      with:
+        name: LangSwitcher-x86_64-zip
+        path: release/
+
+    - name: Download Universal ZIP
+      uses: actions/download-artifact@v4
+      with:
+        name: LangSwitcher-universal-zip
+        path: release/
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
@@ -229,18 +304,28 @@ jobs:
           
           ### Downloads
           
-          | Architecture | File |
-          |---|---|
-          | **Apple Silicon** (M1/M2/M3/M4) | `LangSwitcher-*-arm64.dmg` |
-          | **Intel** (x86_64) | `LangSwitcher-*-x86_64.dmg` |
-          | **Universal** (both) | `LangSwitcher-*-universal.dmg` |
+          | Architecture | DMG (recommended) | ZIP |
+          |---|---|---|
+          | **Apple Silicon** (M1/M2/M3/M4) | `LangSwitcher-*-arm64.dmg` | `LangSwitcher-*-arm64.zip` |
+          | **Intel** (x86_64) | `LangSwitcher-*-x86_64.dmg` | `LangSwitcher-*-x86_64.zip` |
+          | **Universal** (both) | `LangSwitcher-*-universal.dmg` | `LangSwitcher-*-universal.zip` |
           
           ### Installation
+          
+          **DMG (recommended):**
           1. Download the `.dmg` file for your Mac architecture
           2. Open the DMG and drag LangSwitcher to Applications
           3. Launch LangSwitcher from Applications
-          4. Grant **Accessibility** permission when prompted (System Settings -> Privacy & Security -> Accessibility)
-          5. Press **⇧⇧** (double Shift) to convert selected text
+          
+          **ZIP:**
+          1. Download the `.zip` file for your Mac architecture
+          2. Double-click to extract `LangSwitcher.app`
+          3. Drag to Applications
+          4. If macOS says "damaged", run: `xattr -cr /Applications/LangSwitcher.app`
+          
+          **After first launch:**
+          - Grant **Accessibility** permission when prompted (System Settings -> Privacy & Security -> Accessibility)
+          - Press **⇧⇧** (double Shift) to convert selected text
           
           ### What's New
           - Smart Conversion modes (Greedy Line, Last Word, Disabled)
@@ -253,4 +338,4 @@ jobs:
           - macOS 13.0 (Ventura) or later
         draft: false
         prerelease: false
-        files: dmgs/*.dmg
+        files: release/*
