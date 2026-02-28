@@ -110,27 +110,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    /// When no text is selected, simulate selecting the last word/chunk,
-    /// check if it looks like wrong-layout text, and convert it
+    /// When no text is selected, use the configured smart conversion mode
     private func performSmartConversion() {
-        NSLog("[LangSwitcher] performSmartConversion() called")
-        // Strategy: select last typed word via Option+Shift+Left, then convert
+        let mode = settingsManager.smartConversionMode
+        NSLog("[LangSwitcher] performSmartConversion() mode=\(mode.displayName)")
+        
+        switch mode {
+        case .disabled:
+            NSLog("[LangSwitcher] Smart conversion is disabled")
+            return
+            
+        case .lastWord:
+            performLastWordConversion()
+            
+        case .greedyLine:
+            performGreedyLineConversion()
+        }
+    }
+    
+    /// Last Word mode: select one word left, convert if it looks wrong
+    private func performLastWordConversion() {
         let success = accessibilityService.selectAndReplaceLastWord { [weak self] (text: String) -> String? in
             guard let self = self else { return nil }
-            NSLog("[LangSwitcher] selectAndReplaceLastWord got text: '\(text)' (len=\(text.count))")
+            NSLog("[LangSwitcher] lastWord got: '\(text)'")
             
-            let looksWrong = self.textConverter.looksLikeWrongLayout(text)
-            NSLog("[LangSwitcher] looksLikeWrongLayout('\(text)') = \(looksWrong)")
-            
-            if looksWrong {
-                let result = self.textConverter.convertSelectedText(text)
-                NSLog("[LangSwitcher] convertSelectedText returned: \(result ?? "nil")")
-                return result
+            if self.textConverter.looksLikeWrongLayout(text) {
+                return self.textConverter.convertSelectedText(text)
             }
             return nil
         }
         
-        NSLog("[LangSwitcher] performSmartConversion result: \(success)")
+        if success {
+            settingsManager.incrementConversionCount()
+            playFeedback()
+        }
+    }
+    
+    /// Greedy Line mode: select to line start, find boundary, convert wrong-layout tail
+    private func performGreedyLineConversion() {
+        let success = accessibilityService.selectLineAndReplace { [weak self] (lineText: String) -> String? in
+            guard let self = self else { return nil }
+            NSLog("[LangSwitcher] greedyLine got line: '\(lineText)' (len=\(lineText.count))")
+            
+            return self.textConverter.convertLineGreedy(lineText)
+        }
+        
         if success {
             settingsManager.incrementConversionCount()
             playFeedback()

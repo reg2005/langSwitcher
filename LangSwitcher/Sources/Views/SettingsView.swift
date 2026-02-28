@@ -51,8 +51,22 @@ struct GeneralSettingsTab: View {
                 Toggle("Show Notifications", isOn: $settingsManager.showNotifications)
             }
             
-            Section("Behavior") {
-                Text("When text is selected, the shortcut converts the selection.\nWhen no text is selected, the app auto-selects the last typed word and converts it if it looks like wrong-layout gibberish.")
+            Section("Smart Conversion (No Selection)") {
+                Picker("Mode:", selection: $settingsManager.smartConversionMode) {
+                    ForEach(SmartConversionMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                
+                Text(settingsManager.smartConversionMode.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+            }
+            
+            Section("How It Works") {
+                Text("When text is selected, the shortcut converts the selection.\nWhen no text is selected, the behavior depends on the Smart Conversion mode above.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

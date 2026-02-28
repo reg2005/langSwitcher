@@ -1,6 +1,34 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Smart Conversion Mode
+/// Determines behavior when no text is selected and the hotkey is pressed
+
+enum SmartConversionMode: Int, CaseIterable, Codable {
+    case lastWord = 0      // Convert only last word (current behavior)
+    case greedyLine = 1    // Select to line start, find boundary, convert wrong-layout tail
+    case disabled = 2      // No smart conversion — only works with explicit selection
+    
+    var displayName: String {
+        switch self {
+        case .lastWord: return "Last Word Only"
+        case .greedyLine: return "Greedy (Entire Phrase)"
+        case .disabled: return "Disabled"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .lastWord:
+            return "Converts only the last typed word before the cursor."
+        case .greedyLine:
+            return "Selects text to the start of line, finds where the wrong layout begins, and converts the entire wrong-layout phrase."
+        case .disabled:
+            return "Smart conversion is off. You must manually select text before pressing the hotkey."
+        }
+    }
+}
+
 // MARK: - Settings Manager
 // Persists user preferences via UserDefaults
 
@@ -55,6 +83,10 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(playSounds, forKey: Keys.playSounds) }
     }
     
+    @Published var smartConversionMode: SmartConversionMode {
+        didSet { defaults.set(smartConversionMode.rawValue, forKey: Keys.smartConversionMode) }
+    }
+    
     @Published var conversionCount: Int {
         didSet { defaults.set(conversionCount, forKey: Keys.conversionCount) }
     }
@@ -85,6 +117,7 @@ final class SettingsManager: ObservableObject {
         static let launchAtLogin = "launchAtLogin"
         static let showNotifications = "showNotifications"
         static let playSounds = "playSounds"
+        static let smartConversionMode = "smartConversionMode"
         static let conversionCount = "conversionCount"
     }
     
@@ -105,6 +138,9 @@ final class SettingsManager: ObservableObject {
         self.launchAtLogin = defaults.bool(forKey: Keys.launchAtLogin)
         self.showNotifications = defaults.object(forKey: Keys.showNotifications) as? Bool ?? true
         self.playSounds = defaults.object(forKey: Keys.playSounds) as? Bool ?? true
+        let savedSmartMode = defaults.object(forKey: Keys.smartConversionMode) as? Int
+        self.smartConversionMode = SmartConversionMode(rawValue: savedSmartMode ?? 1) ?? .greedyLine // Default: greedy
+        
         self.conversionCount = defaults.integer(forKey: Keys.conversionCount)
         
         // Load layouts

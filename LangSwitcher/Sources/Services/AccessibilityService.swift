@@ -63,6 +63,56 @@ final class AccessibilityService {
         return true
     }
     
+    // MARK: - Smart Selection (Greedy Line)
+    
+    /// Select from cursor to start of line (⌘⇧←), copy, pass to converter,
+    /// paste the result back. The converter is responsible for determining
+    /// which portion to convert and returning the full replacement text.
+    func selectLineAndReplace(with converter: (String) -> String?) -> Bool {
+        let pasteboard = NSPasteboard.general
+        let savedContents = savePasteboard()
+        
+        NSLog("[LangSwitcher] selectLineAndReplace: selecting to line start (⌘⇧←)...")
+        
+        // Select from cursor to beginning of line: Cmd+Shift+Left
+        simulateSelectToLineStart()
+        usleep(150_000) // 150ms
+        
+        // Copy the selection
+        pasteboard.clearContents()
+        simulateCopy()
+        usleep(150_000) // 150ms
+        
+        guard let selectedText = pasteboard.string(forType: .string),
+              !selectedText.isEmpty else {
+            NSLog("[LangSwitcher] selectLineAndReplace: no text copied")
+            restorePasteboard(savedContents)
+            return false
+        }
+        
+        NSLog("[LangSwitcher] selectLineAndReplace: copied line = '\(selectedText)' (len=\(selectedText.count))")
+        
+        guard let convertedText = converter(selectedText) else {
+            NSLog("[LangSwitcher] selectLineAndReplace: converter returned nil, deselecting")
+            simulateRightArrow()
+            restorePasteboard(savedContents)
+            return false
+        }
+        
+        NSLog("[LangSwitcher] selectLineAndReplace: pasting = '\(convertedText)'")
+        
+        // Paste (replaces the entire selection from cursor to line start)
+        pasteboard.clearContents()
+        pasteboard.setString(convertedText, forType: .string)
+        simulatePaste()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.restorePasteboard(savedContents)
+        }
+        
+        return true
+    }
+    
     // MARK: - Smart Selection (Last Word)
     
     /// When no text is selected, select the last typed word/chunk via
@@ -150,6 +200,12 @@ final class AccessibilityService {
     private func simulatePaste() {
         NSLog("[LangSwitcher] Simulating ⌘V...")
         simulateKeystroke(virtualKey: 0x09, modifiers: .maskCommand) // V key
+    }
+    
+    /// Simulate Cmd+Shift+Left to select from cursor to start of line
+    private func simulateSelectToLineStart() {
+        NSLog("[LangSwitcher] Simulating ⌘⇧←...")
+        simulateKeystroke(virtualKey: 0x7B, modifiers: [.maskShift, .maskCommand]) // Left arrow + Cmd+Shift
     }
     
     /// Simulate Shift+Option+Left to select one word to the left
