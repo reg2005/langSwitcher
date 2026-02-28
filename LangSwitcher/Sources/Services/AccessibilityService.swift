@@ -116,45 +116,52 @@ final class AccessibilityService {
     
     // MARK: - Keyboard Simulation
     
+    /// Helper: post a key event with modifiers.
+    /// Uses .hidSystemState to avoid interference with current keyboard state
+    /// (e.g., if Shift is still physically held from double-shift trigger).
+    private func postKeyEvent(virtualKey: CGKeyCode, keyDown: Bool, modifiers: CGEventFlags = []) {
+        // Use .hidSystemState instead of .combinedSessionState to create events
+        // independent of the current modifier state (avoids Shift bleed from double-tap)
+        let source = CGEventSource(stateID: .hidSystemState)
+        
+        guard let event = CGEvent(keyboardEventSource: source, virtualKey: virtualKey, keyDown: keyDown) else {
+            NSLog("[LangSwitcher] ERROR: Failed to create CGEvent (key=\(virtualKey), down=\(keyDown))")
+            return
+        }
+        
+        // Set flags explicitly — this overrides any current keyboard state
+        event.flags = modifiers
+        event.post(tap: .cgAnnotatedSessionEventTap)
+        
+        NSLog("[LangSwitcher] Posted key event: key=0x\(String(virtualKey, radix: 16)), down=\(keyDown), mods=\(modifiers.rawValue)")
+    }
+    
+    /// Simulate a full keystroke (key down + key up) with modifiers
+    private func simulateKeystroke(virtualKey: CGKeyCode, modifiers: CGEventFlags = []) {
+        postKeyEvent(virtualKey: virtualKey, keyDown: true, modifiers: modifiers)
+        postKeyEvent(virtualKey: virtualKey, keyDown: false, modifiers: modifiers)
+    }
+    
     private func simulateCopy() {
-        let source = CGEventSource(stateID: .combinedSessionState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true) // C
-        keyDown?.flags = .maskCommand
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)
-        keyUp?.flags = .maskCommand
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        NSLog("[LangSwitcher] Simulating ⌘C...")
+        simulateKeystroke(virtualKey: 0x08, modifiers: .maskCommand) // C key
     }
     
     private func simulatePaste() {
-        let source = CGEventSource(stateID: .combinedSessionState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true) // V
-        keyDown?.flags = .maskCommand
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false)
-        keyUp?.flags = .maskCommand
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        NSLog("[LangSwitcher] Simulating ⌘V...")
+        simulateKeystroke(virtualKey: 0x09, modifiers: .maskCommand) // V key
     }
     
     /// Simulate Shift+Option+Left to select one word to the left
     private func simulateSelectWordLeft() {
-        let source = CGEventSource(stateID: .combinedSessionState)
-        // Left arrow = keyCode 0x7B
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x7B, keyDown: true)
-        keyDown?.flags = [.maskShift, .maskAlternate] // Shift+Option
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x7B, keyDown: false)
-        keyUp?.flags = [.maskShift, .maskAlternate]
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        NSLog("[LangSwitcher] Simulating ⇧⌥←...")
+        simulateKeystroke(virtualKey: 0x7B, modifiers: [.maskShift, .maskAlternate]) // Left arrow
     }
     
     /// Simulate Right arrow to deselect (move cursor to end of selection)
     private func simulateRightArrow() {
-        let source = CGEventSource(stateID: .combinedSessionState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x7C, keyDown: true) // Right arrow
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x7C, keyDown: false)
-        keyDown?.post(tap: .cghidEventTap)
-        keyUp?.post(tap: .cghidEventTap)
+        NSLog("[LangSwitcher] Simulating →...")
+        simulateKeystroke(virtualKey: 0x7C) // Right arrow, no modifiers
     }
     
     // MARK: - Pasteboard Save/Restore
