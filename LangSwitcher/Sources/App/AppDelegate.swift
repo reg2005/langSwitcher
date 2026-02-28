@@ -12,6 +12,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let accessibilityService = AccessibilityService()
     private lazy var textConverter = TextConverter(settingsManager: settingsManager)
     
+    private var l10n: LocalizationManager { LocalizationManager.shared }
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSLog("[LangSwitcher] App launched. Bundle: \(Bundle.main.bundlePath)")
         NSLog("[LangSwitcher] Executable: \(Bundle.main.executablePath ?? "unknown")")
@@ -84,9 +86,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSLog("[LangSwitcher] AXIsProcessTrusted=false. Will attempt conversion anyway (CGEvent may work with Input Monitoring).")
             if !hasShownPermissionAlert {
                 hasShownPermissionAlert = true
-                // Don't block — just log. User already granted permission but macOS may
-                // report false if the binary changed (rebuild from Xcode) or if permission
-                // was granted for a different path. We'll try the conversion regardless.
                 NSLog("[LangSwitcher] TIP: If conversion doesn't work, remove the app from Accessibility list in System Settings and re-add it. Also check Input Monitoring.")
             }
         }
@@ -110,7 +109,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             playFeedback()
         } else {
             NSLog("[LangSwitcher] No selected text, trying smart conversion after short delay...")
-            // Small delay to let the first ⌘C fully settle before attempting smart conversion
             usleep(50_000) // 50ms
             performSmartConversion()
         }
@@ -208,24 +206,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showAccessibilityAlert() {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
-        alert.messageText = "Accessibility Access Required"
-        alert.informativeText = """
-        LangSwitcher needs Accessibility permission to read and replace text.
-        
-        Go to System Settings → Privacy & Security → Accessibility and enable LangSwitcher.
-        
-        If running from Xcode: add the built app from DerivedData or add Xcode itself.
-        
-        If you already granted permission but it still doesn't work:
-        1. Remove LangSwitcher from the Accessibility list
-        2. Re-add it
-        3. Restart the app
-        
-        Also check: Privacy & Security → Input Monitoring — LangSwitcher may need to be listed there too.
-        """
+        alert.messageText = l10n.t("alert.accessibilityTitle")
+        alert.informativeText = l10n.t("alert.accessibilityMessage")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Continue Anyway")
+        alert.addButton(withTitle: l10n.t("alert.openSystemSettings"))
+        alert.addButton(withTitle: l10n.t("alert.continueAnyway"))
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {

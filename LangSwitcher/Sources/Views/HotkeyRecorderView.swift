@@ -7,17 +7,18 @@ import Carbon
 struct HotkeyRecorderView: View {
     @Binding var keyCode: UInt16
     @Binding var modifiers: NSEvent.ModifierFlags
+    @EnvironmentObject var l10n: LocalizationManager
     @State private var isRecording = false
     @State private var monitor: Any?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Click \"Record\" and press your desired shortcut:")
+            Text(l10n.t("hotkeyRecorder.prompt"))
                 .font(.subheadline)
             
             HStack {
                 if isRecording {
-                    Text("Press a key combination...")
+                    Text(l10n.t("hotkeyRecorder.pressKey"))
                         .foregroundStyle(.orange)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(8)
@@ -31,7 +32,7 @@ struct HotkeyRecorderView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 
-                Button(isRecording ? "Cancel" : "Record") {
+                Button(isRecording ? l10n.t("hotkeyRecorder.cancel") : l10n.t("hotkeyRecorder.record")) {
                     if isRecording {
                         stopRecording()
                     } else {

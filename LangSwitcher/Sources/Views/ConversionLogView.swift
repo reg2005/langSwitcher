@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ConversionLogView: View {
     @ObservedObject var logStore: ConversionLogStore
+    @EnvironmentObject var l10n: LocalizationManager
     @State private var showClearConfirmation = false
     
     private let dateFormatter: DateFormatter = {
@@ -17,28 +18,28 @@ struct ConversionLogView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
-                Text("Conversion Log")
+                Text(l10n.t("log.title"))
                     .font(.headline)
                 
                 Spacer()
                 
-                Text("\(logStore.logs.count) entries")
+                Text(l10n.t("log.entries").replacingOccurrences(of: "%d", with: "\(logStore.logs.count)"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                Button("Export JSON") {
+                Button(l10n.t("log.exportJSON")) {
                     exportJSON()
                 }
                 .font(.caption)
                 
-                Button("Clear All") {
+                Button(l10n.t("log.clearAll")) {
                     showClearConfirmation = true
                 }
                 .font(.caption)
                 .foregroundStyle(.red)
             }
             
-            Text("Rate each conversion as correct or incorrect to build training data. Click to cycle: unrated -> correct -> incorrect -> unrated.")
+            Text(l10n.t("log.ratingHint"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
@@ -46,10 +47,10 @@ struct ConversionLogView: View {
             if logStore.logs.isEmpty {
                 VStack {
                     Spacer()
-                    Text("No conversions logged yet.")
+                    Text(l10n.t("log.emptyTitle"))
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity)
-                    Text("Use the hotkey to convert text and entries will appear here.")
+                    Text(l10n.t("log.emptyHint"))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                     Spacer()
@@ -63,19 +64,20 @@ struct ConversionLogView: View {
                             onToggleRating: { toggleRating(entry: entry) },
                             onDelete: { logStore.delete(id: entry.id) }
                         )
+                        .environmentObject(l10n)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
         .padding()
-        .alert("Clear All Logs?", isPresented: $showClearConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Clear All", role: .destructive) {
+        .alert(l10n.t("log.clearConfirmTitle"), isPresented: $showClearConfirmation) {
+            Button(l10n.t("log.cancel"), role: .cancel) {}
+            Button(l10n.t("log.clearAll"), role: .destructive) {
                 logStore.clearAll()
             }
         } message: {
-            Text("This will permanently delete all conversion log entries. This cannot be undone.")
+            Text(l10n.t("log.clearConfirmMessage"))
         }
     }
     
@@ -100,7 +102,7 @@ struct ConversionLogView: View {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "conversion_log.json"
-        panel.title = "Export Conversion Log"
+        panel.title = l10n.t("log.exportPanelTitle")
         
         if panel.runModal() == .OK, let url = panel.url {
             do {
@@ -120,6 +122,7 @@ struct ConversionLogRow: View {
     let dateFormatter: DateFormatter
     let onToggleRating: () -> Void
     let onDelete: () -> Void
+    @EnvironmentObject var l10n: LocalizationManager
     
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -177,7 +180,7 @@ struct ConversionLogRow: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help("Delete this entry")
+            .help(l10n.t("log.deleteEntry"))
         }
         .padding(.vertical, 2)
     }
@@ -201,9 +204,9 @@ struct ConversionLogRow: View {
     
     private var ratingTooltip: String {
         switch entry.isCorrect {
-        case nil:    return "Unrated — click to mark as correct"
-        case true?:  return "Correct — click to mark as incorrect"
-        case false?: return "Incorrect — click to clear rating"
+        case nil:    return l10n.t("log.ratingUnrated")
+        case true?:  return l10n.t("log.ratingCorrect")
+        case false?: return l10n.t("log.ratingIncorrect")
         }
     }
     

@@ -9,22 +9,21 @@ enum SmartConversionMode: Int, CaseIterable, Codable {
     case greedyLine = 1    // Select to line start, find boundary, convert wrong-layout tail
     case disabled = 2      // No smart conversion — only works with explicit selection
     
-    var displayName: String {
+    @MainActor var displayName: String {
+        let l10n = LocalizationManager.shared
         switch self {
-        case .lastWord: return "Last Word Only"
-        case .greedyLine: return "Greedy (Entire Phrase)"
-        case .disabled: return "Disabled"
+        case .lastWord: return l10n.t("smartMode.lastWord.name")
+        case .greedyLine: return l10n.t("smartMode.greedyLine.name")
+        case .disabled: return l10n.t("smartMode.disabled.name")
         }
     }
     
-    var description: String {
+    @MainActor var description: String {
+        let l10n = LocalizationManager.shared
         switch self {
-        case .lastWord:
-            return "Converts only the last typed word before the cursor."
-        case .greedyLine:
-            return "Selects text to the start of line, finds where the wrong layout begins, and converts the entire wrong-layout phrase."
-        case .disabled:
-            return "Smart conversion is off. You must manually select text before pressing the hotkey."
+        case .lastWord: return l10n.t("smartMode.lastWord.desc")
+        case .greedyLine: return l10n.t("smartMode.greedyLine.desc")
+        case .disabled: return l10n.t("smartMode.disabled.desc")
         }
     }
 }
@@ -37,22 +36,21 @@ enum LayoutSwitchMode: Int, CaseIterable, Codable {
     case ifLastWordConverted = 1  // Switch if the last word was in wrong layout and got reconverted
     case ifAnyWordConverted = 2   // Switch if any word in the converted text needed reconversion
     
-    var displayName: String {
+    @MainActor var displayName: String {
+        let l10n = LocalizationManager.shared
         switch self {
-        case .always: return "Always switch layout"
-        case .ifLastWordConverted: return "Switch if last word was converted"
-        case .ifAnyWordConverted: return "Switch if any word required conversion"
+        case .always: return l10n.t("layoutSwitchMode.always.name")
+        case .ifLastWordConverted: return l10n.t("layoutSwitchMode.ifLastWord.name")
+        case .ifAnyWordConverted: return l10n.t("layoutSwitchMode.ifAnyWord.name")
         }
     }
     
-    var description: String {
+    @MainActor var description: String {
+        let l10n = LocalizationManager.shared
         switch self {
-        case .always:
-            return "Always switch the keyboard layout after pressing the hotkey, regardless of whether text was converted."
-        case .ifLastWordConverted:
-            return "Switch the layout only if the last word before the cursor was typed in the wrong layout and got reconverted."
-        case .ifAnyWordConverted:
-            return "Switch the layout if any word in the converted text needed reconversion to the correct layout."
+        case .always: return l10n.t("layoutSwitchMode.always.desc")
+        case .ifLastWordConverted: return l10n.t("layoutSwitchMode.ifLastWord.desc")
+        case .ifAnyWordConverted: return l10n.t("layoutSwitchMode.ifAnyWord.desc")
         }
     }
 }

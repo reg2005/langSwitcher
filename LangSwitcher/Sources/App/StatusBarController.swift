@@ -16,6 +16,8 @@ final class StatusBarController {
     
     var onConvertAction: (() -> Void)?
     
+    private var l10n: LocalizationManager { LocalizationManager.shared }
+    
     init(settingsManager: SettingsManager) {
         self.settingsManager = settingsManager
         self.statusBar = NSStatusBar.system
@@ -32,8 +34,8 @@ final class StatusBarController {
         if let button = statusItem.button {
             let image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LangSwitcher")
             image?.isTemplate = true
-            button.image = image
-            button.toolTip = "LangSwitcher — \(settingsManager.hotkeyDescription) to convert"
+            let tooltip = l10n.t("menu.tooltip").replacingOccurrences(of: "%@", with: settingsManager.hotkeyDescription)
+            button.toolTip = tooltip
         }
         statusItem.menu = menu
     }
@@ -47,14 +49,14 @@ final class StatusBarController {
         let attrs: [NSAttributedString.Key: Any] = [
             .font: NSFont.boldSystemFont(ofSize: 13)
         ]
-        headerItem.attributedTitle = NSAttributedString(string: "⌨ LangSwitcher", attributes: attrs)
+        headerItem.attributedTitle = NSAttributedString(string: l10n.t("menu.header"), attributes: attrs)
         menu.addItem(headerItem)
         
         menu.addItem(NSMenuItem.separator())
         
         // Convert action
         let convertItem = NSMenuItem(
-            title: "Convert Text (\(settingsManager.hotkeyDescription))",
+            title: "\(l10n.t("menu.convertText")) (\(settingsManager.hotkeyDescription))",
             action: #selector(convertAction),
             keyEquivalent: ""
         )
@@ -64,7 +66,7 @@ final class StatusBarController {
         menu.addItem(NSMenuItem.separator())
         
         // Active layouts info
-        let layoutsHeader = NSMenuItem(title: "Active Layouts:", action: nil, keyEquivalent: "")
+        let layoutsHeader = NSMenuItem(title: l10n.t("menu.activeLayouts"), action: nil, keyEquivalent: "")
         layoutsHeader.isEnabled = false
         menu.addItem(layoutsHeader)
         
@@ -78,7 +80,7 @@ final class StatusBarController {
         
         // Stats
         let statsItem = NSMenuItem(
-            title: "Conversions: \(settingsManager.conversionCount)",
+            title: "\(l10n.t("menu.conversions")) \(settingsManager.conversionCount)",
             action: nil,
             keyEquivalent: ""
         )
@@ -89,7 +91,7 @@ final class StatusBarController {
         
         // Settings
         let settingsItem = NSMenuItem(
-            title: "Settings...",
+            title: l10n.t("menu.settings"),
             action: #selector(openSettings),
             keyEquivalent: ","
         )
@@ -98,7 +100,7 @@ final class StatusBarController {
         
         // About
         let aboutItem = NSMenuItem(
-            title: "About LangSwitcher",
+            title: l10n.t("menu.about"),
             action: #selector(openAbout),
             keyEquivalent: ""
         )
@@ -109,7 +111,7 @@ final class StatusBarController {
         
         // Quit
         let quitItem = NSMenuItem(
-            title: "Quit LangSwitcher",
+            title: l10n.t("menu.quit"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -132,6 +134,7 @@ final class StatusBarController {
         
         let settingsView = SettingsView()
             .environmentObject(settingsManager)
+            .environmentObject(l10n)
         
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 580, height: 520),
@@ -139,7 +142,7 @@ final class StatusBarController {
             backing: .buffered,
             defer: false
         )
-        window.title = "LangSwitcher Settings"
+        window.title = l10n.t("settings.windowTitle")
         window.center()
         window.contentView = NSHostingView(rootView: settingsView)
         window.isReleasedWhenClosed = false
@@ -163,9 +166,9 @@ final class StatusBarController {
             backing: .buffered,
             defer: false
         )
-        window.title = "About LangSwitcher"
+        window.title = l10n.t("about.windowTitle")
         window.center()
-        window.contentView = NSHostingView(rootView: AboutView())
+        window.contentView = NSHostingView(rootView: AboutView().environmentObject(l10n))
         window.isReleasedWhenClosed = false
         window.makeKeyAndOrderFront(nil)
         

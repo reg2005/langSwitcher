@@ -2,40 +2,46 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var l10n: LocalizationManager
     @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
             GeneralSettingsTab()
                 .environmentObject(settingsManager)
+                .environmentObject(l10n)
                 .tabItem {
-                    Label("General", systemImage: "gear")
+                    Label(l10n.t("settings.tab.general"), systemImage: "gear")
                 }
                 .tag(0)
             
             LayoutsSettingsTab()
                 .environmentObject(settingsManager)
+                .environmentObject(l10n)
                 .tabItem {
-                    Label("Layouts", systemImage: "keyboard")
+                    Label(l10n.t("settings.tab.layouts"), systemImage: "keyboard")
                 }
                 .tag(1)
             
             HotkeySettingsTab()
                 .environmentObject(settingsManager)
+                .environmentObject(l10n)
                 .tabItem {
-                    Label("Hotkey", systemImage: "command")
+                    Label(l10n.t("settings.tab.hotkey"), systemImage: "command")
                 }
                 .tag(2)
             
             PermissionsView()
+                .environmentObject(l10n)
                 .tabItem {
-                    Label("Permissions", systemImage: "lock.shield")
+                    Label(l10n.t("settings.tab.permissions"), systemImage: "lock.shield")
                 }
                 .tag(3)
             
             ConversionLogView(logStore: ConversionLogStore.shared)
+                .environmentObject(l10n)
                 .tabItem {
-                    Label("Log", systemImage: "list.bullet.rectangle")
+                    Label(l10n.t("settings.tab.log"), systemImage: "list.bullet.rectangle")
                 }
                 .tag(4)
         }
@@ -48,17 +54,24 @@ struct SettingsView: View {
 
 struct GeneralSettingsTab: View {
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var l10n: LocalizationManager
     
     var body: some View {
         Form {
             Section {
-                Toggle("Launch at Login", isOn: $settingsManager.launchAtLogin)
-                Toggle("Play Sound on Conversion", isOn: $settingsManager.playSounds)
-                Toggle("Show Notifications", isOn: $settingsManager.showNotifications)
+                Picker(l10n.t("general.language"), selection: $l10n.currentLanguage) {
+                    ForEach(LocalizationManager.availableLanguages, id: \.code) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
+                }
+                
+                Toggle(l10n.t("general.launchAtLogin"), isOn: $settingsManager.launchAtLogin)
+                Toggle(l10n.t("general.playSound"), isOn: $settingsManager.playSounds)
+                Toggle(l10n.t("general.showNotifications"), isOn: $settingsManager.showNotifications)
             }
             
-            Section("Smart Conversion (No Selection)") {
-                Picker("Mode:", selection: $settingsManager.smartConversionMode) {
+            Section(l10n.t("general.smartConversion")) {
+                Picker(l10n.t("general.mode"), selection: $settingsManager.smartConversionMode) {
                     ForEach(SmartConversionMode.allCases, id: \.self) { mode in
                         Text(mode.displayName).tag(mode)
                     }
@@ -71,8 +84,8 @@ struct GeneralSettingsTab: View {
                     .padding(.top, 2)
             }
             
-            Section("Layout Switch after Conversion") {
-                Picker("Mode:", selection: $settingsManager.layoutSwitchMode) {
+            Section(l10n.t("general.layoutSwitch")) {
+                Picker(l10n.t("general.mode"), selection: $settingsManager.layoutSwitchMode) {
                     ForEach(LayoutSwitchMode.allCases, id: \.self) { mode in
                         Text(mode.displayName).tag(mode)
                     }
@@ -85,15 +98,15 @@ struct GeneralSettingsTab: View {
                     .padding(.top, 2)
             }
             
-            Section("How It Works") {
-                Text("When text is selected, the shortcut converts the selection.\nWhen no text is selected, the behavior depends on the Smart Conversion mode above.")
+            Section(l10n.t("general.howItWorks")) {
+                Text(l10n.t("general.howItWorksText"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             
-            Section("Statistics") {
+            Section(l10n.t("general.statistics")) {
                 HStack {
-                    Text("Total Conversions:")
+                    Text(l10n.t("general.totalConversions"))
                     Spacer()
                     Text("\(settingsManager.conversionCount)")
                         .foregroundStyle(.secondary)
@@ -108,13 +121,14 @@ struct GeneralSettingsTab: View {
 
 struct LayoutsSettingsTab: View {
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var l10n: LocalizationManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Active Keyboard Layouts")
+            Text(l10n.t("layouts.title"))
                 .font(.headline)
             
-            Text("These layouts are detected from your system keyboard settings. The converter maps characters between them based on physical key positions.")
+            Text(l10n.t("layouts.description"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
@@ -144,13 +158,13 @@ struct LayoutsSettingsTab: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             
             HStack {
-                Button("Refresh from System") {
+                Button(l10n.t("layouts.refresh")) {
                     settingsManager.refreshSystemLayouts()
                 }
                 
                 Spacer()
                 
-                Text("\(settingsManager.enabledLayouts.count) layouts detected")
+                Text(l10n.t("layouts.count").replacingOccurrences(of: "%d", with: "\(settingsManager.enabledLayouts.count)"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -163,19 +177,20 @@ struct LayoutsSettingsTab: View {
 
 struct HotkeySettingsTab: View {
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var l10n: LocalizationManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Keyboard Shortcut")
+            Text(l10n.t("hotkey.title"))
                 .font(.headline)
             
-            Text("Press this shortcut to convert text. If text is selected it converts the selection; otherwise it auto-selects the last word.")
+            Text(l10n.t("hotkey.description"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
             // Current shortcut display
             HStack {
-                Text("Current shortcut:")
+                Text(l10n.t("hotkey.current"))
                 Spacer()
                 Text(settingsManager.hotkeyDescription)
                     .font(.system(.title2, design: .rounded))
@@ -189,17 +204,17 @@ struct HotkeySettingsTab: View {
             Divider()
             
             // Double Shift toggle
-            Toggle("Use Double Shift (⇧⇧) as shortcut", isOn: $settingsManager.useDoubleShift)
+            Toggle(l10n.t("hotkey.useDoubleShift"), isOn: $settingsManager.useDoubleShift)
                 .toggleStyle(.switch)
             
-            Text("Quickly press Shift twice to trigger conversion. This is the recommended shortcut — fast and doesn't conflict with other apps.")
+            Text(l10n.t("hotkey.doubleShiftHint"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
             if !settingsManager.useDoubleShift {
                 Divider()
                 
-                Text("Custom Shortcut")
+                Text(l10n.t("hotkey.customTitle"))
                     .font(.subheadline)
                     .bold()
                 
@@ -210,6 +225,7 @@ struct HotkeySettingsTab: View {
                         set: { settingsManager.hotkeyModifierFlags = $0 }
                     )
                 )
+                .environmentObject(l10n)
             }
             
             Spacer()

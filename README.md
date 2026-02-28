@@ -190,6 +190,10 @@ LangSwitcher/
 │   │   ├── HotkeyManager.swift         # Global hotkey (double-shift + custom)
 │   │   ├── AccessibilityService.swift  # Clipboard-based text replacement
 │   │   └── SettingsManager.swift       # UserDefaults persistence
+│   ├── Localization/
+│   │   ├── LocalizationManager.swift   # Runtime i18n engine
+│   │   ├── Strings_en.swift            # English strings (~113 keys)
+│   │   └── Strings_ru.swift            # Russian strings
 │   └── Models/
 │       ├── KeyboardLayout.swift        # Layout model & character maps
 │       └── ConversionLog.swift         # Conversion log entry model
@@ -250,6 +254,7 @@ Input: "ghbdtn" (typed on US layout when Russian was intended)
 | **Hotkey** | NSEvent global monitor + CGEvent |
 | **Settings** | UserDefaults |
 | **Conversion Log** | SQLite3 (C API, no dependencies) |
+| **Localization** | Custom runtime i18n (English, Russian) |
 | **CI/CD** | GitHub Actions |
 | **Distribution** | DMG (Intel + ARM + Universal) via GitHub Releases |
 | **Website** | GitHub Pages |
@@ -292,6 +297,50 @@ static let italian: [Character: Character] = {
     return map
 }()
 ```
+
+### Adding a New Language (i18n)
+
+LangSwitcher uses a custom localization system — no `.lproj` / `.strings` files. Language can be switched at runtime without restarting the app.
+
+1. **Copy the English template**:
+   ```bash
+   cp LangSwitcher/Sources/Localization/Strings_en.swift \
+      LangSwitcher/Sources/Localization/Strings_xx.swift
+   ```
+   Replace `xx` with the language code (e.g. `de`, `fr`, `es`).
+
+2. **Translate** every value in the `strings` dictionary. Keys stay the same — only change the values.
+
+3. **Update `register()`** at the bottom of your new file:
+   ```swift
+   @MainActor static func register() {
+       LocalizationManager.shared.register(language: "xx", strings: strings)
+   }
+   ```
+
+4. **Register the new file** in `LangSwitcherApp.swift`:
+   ```swift
+   private func initializeLocalization() {
+       Strings_en.register()
+       Strings_ru.register()
+       Strings_xx.register()  // <-- add this
+   }
+   ```
+
+5. **Add to available languages** in `LocalizationManager.swift`:
+   ```swift
+   let availableLanguages: [(code: String, name: String)] = [
+       ("en", "English"),
+       ("ru", "Русский"),
+       ("xx", "Your Language"),  // <-- add this
+   ]
+   ```
+
+6. **Add the file to Xcode project** — add a `PBXBuildFile`, `PBXFileReference`, add to the Localization group, and add to `PBXSourcesBuildPhase` in `project.pbxproj`. Follow the existing `E1000001...` PBX ID pattern.
+
+7. **Run tests** — all must pass.
+
+String keys use namespace prefixes: `menu.*`, `settings.*`, `general.*`, `smartMode.*`, `layouts.*`, `hotkey.*`, `permissions.*`, `log.*`, `about.*`, `alert.*`, `common.*`.
 
 ### Development
 
