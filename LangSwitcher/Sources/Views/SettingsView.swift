@@ -5,49 +5,74 @@ struct SettingsView: View {
     @EnvironmentObject var l10n: LocalizationManager
     @State private var selectedTab = 0
     
+    private var tabItems: [(String, String)] {
+        [
+            (l10n.t("settings.tab.general"), "gear"),
+            (l10n.t("settings.tab.layouts"), "keyboard"),
+            (l10n.t("settings.tab.hotkey"), "command"),
+            (l10n.t("settings.tab.permissions"), "lock.shield"),
+            (l10n.t("settings.tab.log"), "list.bullet.rectangle"),
+        ]
+    }
+    
     var body: some View {
-        TabView(selection: $selectedTab) {
-            GeneralSettingsTab()
-                .environmentObject(settingsManager)
-                .environmentObject(l10n)
-                .tabItem {
-                    Label(l10n.t("settings.tab.general"), systemImage: "gear")
+        VStack(spacing: 0) {
+            // Classic segmented tab bar
+            HStack(spacing: 0) {
+                ForEach(Array(tabItems.enumerated()), id: \.offset) { index, item in
+                    Button {
+                        selectedTab = index
+                    } label: {
+                        VStack(spacing: 3) {
+                            Image(systemName: item.1)
+                                .font(.system(size: 16))
+                            Text(item.0)
+                                .font(.caption2)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(selectedTab == index ? Color.accentColor.opacity(0.15) : Color.clear)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(selectedTab == index ? .primary : .secondary)
                 }
-                .tag(0)
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 4)
             
-            LayoutsSettingsTab()
-                .environmentObject(settingsManager)
-                .environmentObject(l10n)
-                .tabItem {
-                    Label(l10n.t("settings.tab.layouts"), systemImage: "keyboard")
-                }
-                .tag(1)
+            Divider()
+                .padding(.top, 4)
             
-            HotkeySettingsTab()
-                .environmentObject(settingsManager)
-                .environmentObject(l10n)
-                .tabItem {
-                    Label(l10n.t("settings.tab.hotkey"), systemImage: "command")
+            // Tab content
+            Group {
+                switch selectedTab {
+                case 0:
+                    GeneralSettingsTab()
+                        .environmentObject(settingsManager)
+                        .environmentObject(l10n)
+                case 1:
+                    LayoutsSettingsTab()
+                        .environmentObject(settingsManager)
+                        .environmentObject(l10n)
+                case 2:
+                    HotkeySettingsTab()
+                        .environmentObject(settingsManager)
+                        .environmentObject(l10n)
+                case 3:
+                    PermissionsView()
+                        .environmentObject(l10n)
+                case 4:
+                    ConversionLogView(logStore: ConversionLogStore.shared)
+                        .environmentObject(settingsManager)
+                        .environmentObject(l10n)
+                default:
+                    EmptyView()
                 }
-                .tag(2)
-            
-            PermissionsView()
-                .environmentObject(l10n)
-                .tabItem {
-                    Label(l10n.t("settings.tab.permissions"), systemImage: "lock.shield")
-                }
-                .tag(3)
-            
-            ConversionLogView(logStore: ConversionLogStore.shared)
-                .environmentObject(settingsManager)
-                .environmentObject(l10n)
-                .tabItem {
-                    Label(l10n.t("settings.tab.log"), systemImage: "list.bullet.rectangle")
-                }
-                .tag(4)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(width: 580, height: 520)
-        .padding()
     }
 }
 

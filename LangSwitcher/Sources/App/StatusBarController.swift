@@ -148,8 +148,6 @@ final class StatusBarController {
         window.contentView = NSHostingView(rootView: settingsView)
         window.isReleasedWhenClosed = false
         window.level = .floating
-        // Prevent macOS 15+ from converting TabView into a toolbar dropdown
-        window.toolbar = nil
         window.makeKeyAndOrderFront(nil)
         
         settingsWindow = window
