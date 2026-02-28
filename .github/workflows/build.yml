@@ -7,10 +7,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  KEYCHAIN_NAME: build.keychain-db
-  KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
-
 jobs:
   test:
     name: Run Tests
@@ -43,12 +39,32 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-    - name: Setup codesigning
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+    - name: Detect codesigning configuration
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      run: |
+        if [ -n "$HAS_CERT" ]; then
+          echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
+        fi
+        if [ -n "$HAS_NOTARIZE" ]; then
+          echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
+        fi
+
+    - name: Setup codesigning keychain
+      if: env.CODESIGN_ENABLED == 'true'
       env:
         CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
         CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
       run: |
+        KEYCHAIN_NAME="build.keychain-db"
+        echo "KEYCHAIN_NAME=$KEYCHAIN_NAME" >> $GITHUB_ENV
+
         # Decode certificate
         echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
 
@@ -75,13 +91,6 @@ jobs:
         rm certificate.p12
 
         echo "CODESIGN_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
-
-    - name: Set ad-hoc signing (fallback)
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 == '' }}
-      run: |
-        echo "CODESIGN_IDENTITY=-" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
 
     - name: Build arm64
       run: |
@@ -166,7 +175,7 @@ jobs:
         ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-arm64.zip"
 
     - name: Notarize DMG
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && secrets.MACOS_NOTARIZATION_APPLE_ID != '' }}
+      if: env.CODESIGN_ENABLED == 'true' && env.NOTARIZE_ENABLED == 'true'
       env:
         APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
         APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
@@ -183,7 +192,7 @@ jobs:
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
-      if: ${{ always() && secrets.MACOS_CERTIFICATE_P12 != '' }}
+      if: always() && env.CODESIGN_ENABLED == 'true'
       run: |
         security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
@@ -212,12 +221,31 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-    - name: Setup codesigning
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+    - name: Detect codesigning configuration
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      run: |
+        if [ -n "$HAS_CERT" ]; then
+          echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
+        fi
+        if [ -n "$HAS_NOTARIZE" ]; then
+          echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
+        fi
+
+    - name: Setup codesigning keychain
+      if: env.CODESIGN_ENABLED == 'true'
       env:
         CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
         CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
       run: |
+        KEYCHAIN_NAME="build.keychain-db"
+        echo "KEYCHAIN_NAME=$KEYCHAIN_NAME" >> $GITHUB_ENV
         echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
         security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
         security set-keychain-settings -lut 21600 "$KEYCHAIN_NAME"
@@ -232,13 +260,6 @@ jobs:
         security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
         rm certificate.p12
         echo "CODESIGN_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
-
-    - name: Set ad-hoc signing (fallback)
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 == '' }}
-      run: |
-        echo "CODESIGN_IDENTITY=-" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
 
     - name: Build x86_64
       run: |
@@ -322,7 +343,7 @@ jobs:
         ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-x86_64.zip"
 
     - name: Notarize DMG
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && secrets.MACOS_NOTARIZATION_APPLE_ID != '' }}
+      if: env.CODESIGN_ENABLED == 'true' && env.NOTARIZE_ENABLED == 'true'
       env:
         APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
         APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
@@ -339,7 +360,7 @@ jobs:
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
-      if: ${{ always() && secrets.MACOS_CERTIFICATE_P12 != '' }}
+      if: always() && env.CODESIGN_ENABLED == 'true'
       run: |
         security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
@@ -368,12 +389,31 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-    - name: Setup codesigning
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+    - name: Detect codesigning configuration
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+      run: |
+        if [ -n "$HAS_CERT" ]; then
+          echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
+        fi
+        if [ -n "$HAS_NOTARIZE" ]; then
+          echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
+        fi
+
+    - name: Setup codesigning keychain
+      if: env.CODESIGN_ENABLED == 'true'
       env:
         CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
         CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
       run: |
+        KEYCHAIN_NAME="build.keychain-db"
+        echo "KEYCHAIN_NAME=$KEYCHAIN_NAME" >> $GITHUB_ENV
         echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
         security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
         security set-keychain-settings -lut 21600 "$KEYCHAIN_NAME"
@@ -388,13 +428,6 @@ jobs:
         security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
         rm certificate.p12
         echo "CODESIGN_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
-
-    - name: Set ad-hoc signing (fallback)
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 == '' }}
-      run: |
-        echo "CODESIGN_IDENTITY=-" >> $GITHUB_ENV
-        echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
 
     - name: Build Universal (arm64 + x86_64)
       run: |
@@ -478,7 +511,7 @@ jobs:
         ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "LangSwitcher-${VERSION}-universal.zip"
 
     - name: Notarize DMG
-      if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && secrets.MACOS_NOTARIZATION_APPLE_ID != '' }}
+      if: env.CODESIGN_ENABLED == 'true' && env.NOTARIZE_ENABLED == 'true'
       env:
         APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
         APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
@@ -495,7 +528,7 @@ jobs:
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
-      if: ${{ always() && secrets.MACOS_CERTIFICATE_P12 != '' }}
+      if: always() && env.CODESIGN_ENABLED == 'true'
       run: |
         security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
