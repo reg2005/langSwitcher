@@ -348,6 +348,40 @@ LangSwitcher uses a custom localization system — no `.lproj` / `.strings` file
 
 String keys use namespace prefixes: `menu.*`, `settings.*`, `general.*`, `smartMode.*`, `layouts.*`, `hotkey.*`, `permissions.*`, `log.*`, `about.*`, `alert.*`, `common.*`.
 
+### Code Signing & Notarization (CI/CD)
+
+Release builds can be signed with an Apple Developer ID certificate and notarized via GitHub Actions. Without secrets configured, builds use ad-hoc signing (works for local use, but macOS Gatekeeper will warn users).
+
+**Required secrets** (Settings > Secrets and variables > Actions):
+
+| Secret | Description |
+|---|---|
+| `MACOS_CERTIFICATE_P12` | Developer ID Application certificate exported as `.p12`, then base64-encoded: `base64 -i cert.p12 \| pbcopy` |
+| `MACOS_CERTIFICATE_PASSWORD` | Password used when exporting the `.p12` file |
+| `MACOS_KEYCHAIN_PASSWORD` | Any random string (used for the temporary CI keychain) |
+| `MACOS_SIGNING_IDENTITY` | Full identity string, e.g. `Developer ID Application: Your Name (TEAMID)` |
+
+**Optional secrets** (for notarization — recommended for public distribution):
+
+| Secret | Description |
+|---|---|
+| `MACOS_NOTARIZATION_APPLE_ID` | Your Apple ID email |
+| `MACOS_NOTARIZATION_PASSWORD` | App-specific password ([appleid.apple.com](https://appleid.apple.com) > Sign-In and Security > App-Specific Passwords) |
+| `MACOS_NOTARIZATION_TEAM_ID` | Your 10-character Apple Developer Team ID |
+
+**How to get the certificate:**
+
+1. Open Keychain Access on your Mac
+2. In the login keychain, find your "Developer ID Application" certificate
+3. Right-click > Export Items > save as `.p12` with a password
+4. Base64-encode it: `base64 -i DeveloperID.p12 | pbcopy`
+5. Paste the result into the `MACOS_CERTIFICATE_P12` GitHub secret
+
+**Behavior:**
+- If `MACOS_CERTIFICATE_P12` is set: builds are signed with your Developer ID + hardened runtime
+- If notarization secrets are also set: DMGs are submitted to Apple for notarization and stapled
+- If no secrets are set: ad-hoc signing (forks and PRs work without any setup)
+
 ### Development
 
 ```bash
