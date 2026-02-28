@@ -4,42 +4,62 @@
 
 Typed text in the wrong keyboard layout? Select it, press a hotkey, and LangSwitcher instantly converts it to the correct layout. No more retyping `ghbdtn` when you meant `привет`.
 
+An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/mac) and [Punto Switcher](https://yandex.ru/soft/punto/).
+
 [![Build](https://github.com/reg2005/langSwitcher/actions/workflows/build.yml/badge.svg)](https://github.com/reg2005/langSwitcher/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-brightgreen.svg)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5-orange.svg)](https://swift.org/)
 
+## Screenshot
+
+![LangSwitcher Settings — General](screenshots/general.png)
+
 ## Key Features
 
 - **Instant text conversion** — select text and press a hotkey to convert between layouts
+- **Smart Conversion modes** — works even without manual text selection:
+  - **Greedy Line (default)** — selects to line start, finds where wrong layout begins, converts the entire wrong-layout phrase
+  - **Last Word** — auto-selects and converts only the last typed word
+  - **Disabled** — only works with explicit text selection
 - **Auto-detection** — automatically detects which layout the text was typed in
 - **System keyboard integration** — uses your installed system keyboard layouts
-- **Double Shift hotkey** — press `⇧⇧` (Shift twice) to convert, or set a custom shortcut
+- **Double Shift hotkey** — press `⇧⇧` (Shift twice quickly) to convert, or set a custom shortcut
+- **Conversion Log** — every conversion is logged to a local SQLite database with a UI for reviewing and labeling (correct/incorrect) for future ML training
+- **JSON export** — export conversion logs for data analysis or model training
 - **Menu bar app** — lives quietly in your status bar, always ready
 - **Multiple layouts** — supports English, Russian, Ukrainian, German, French, Spanish
-- **Zero dependencies** — pure Swift, no external libraries
+- **Punctuation preservation** — `?`, `!`, `/` and other punctuation stay unchanged during conversion
+- **Zero dependencies** — pure Swift, no external libraries, no dictionaries
+- **Privacy first** — no data leaves your Mac, no analytics, no network access
 - **Open source** — MIT licensed, contributions welcome
 
 ## How It Works
 
 ```
 1. You type "ghbdtn" (meant to type "привет" but had English layout active)
-2. Select the mistyped text
+2. Select the mistyped text (or just press the hotkey — Smart Conversion handles it)
 3. Press ⇧⇧ (double Shift)
 4. Text is replaced with "привет"
 ```
 
 LangSwitcher maps characters based on **physical key positions** on the keyboard. The same physical key produces different characters depending on the active layout — LangSwitcher reverses this mapping.
 
-## Installation
+## Download
 
-### Download DMG (Recommended)
+### DMG (Recommended)
 
-1. Go to [Releases](https://github.com/reg2005/langSwitcher/releases/latest)
-2. Download `LangSwitcher-x.x.x.dmg`
-3. Open the DMG and drag **LangSwitcher** to **Applications**
-4. Launch LangSwitcher
-5. Grant **Accessibility** permission when prompted
+Go to [Releases](https://github.com/reg2005/langSwitcher/releases/latest) and download:
+
+| Architecture | File |
+|---|---|
+| **Apple Silicon (M1/M2/M3/M4)** | `LangSwitcher-*-arm64.dmg` |
+| **Intel** | `LangSwitcher-*-x86_64.dmg` |
+| **Universal (both)** | `LangSwitcher-*-universal.dmg` |
+
+1. Open the DMG and drag **LangSwitcher** to **Applications**
+2. Launch LangSwitcher
+3. Grant **Accessibility** permission when prompted
 
 ### Build from Source
 
@@ -53,14 +73,27 @@ LangSwitcher maps characters based on **physical key positions** on the keyboard
 ```bash
 # Clone the repository
 git clone https://github.com/reg2005/langSwitcher.git
-cd LangSwitcher
+cd langSwitcher
 
-# Build with xcodebuild
+# Run tests
+xcodebuild test \
+  -project LangSwitcher.xcodeproj \
+  -scheme LangSwitcher \
+  -destination 'platform=macOS' \
+  CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO
+
+# Build (universal binary)
 xcodebuild -project LangSwitcher.xcodeproj \
   -scheme LangSwitcher \
   -configuration Release \
   -derivedDataPath build \
+  -arch arm64 -arch x86_64 \
+  ONLY_ACTIVE_ARCH=NO \
   CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO \
   build
 
 # The app is at build/Build/Products/Release/LangSwitcher.app
@@ -74,13 +107,21 @@ Or open `LangSwitcher.xcodeproj` in Xcode and press `⌘R`.
 
 1. **Type text** in any application
 2. **Realize** you had the wrong keyboard layout active
-3. **Select** the mistyped text (`⌘A` or drag to select)
-4. **Press** `⇧⇧` (double Shift) — or your custom hotkey
+3. **Press** `⇧⇧` (double Shift) — Smart Conversion auto-selects and converts
+4. Or **select** the mistyped text manually, then press the hotkey
 5. The text is **instantly converted** to the correct layout
+
+### Smart Conversion Modes
+
+| Mode | Behavior |
+|------|----------|
+| **Greedy Line** (default) | Selects to line start, finds where wrong layout begins, converts the entire wrong-layout phrase. Handles `"ghbdtn rfr ltkf lheu"` -> `"привет как дела друг"` |
+| **Last Word** | Auto-selects only the last word before the cursor, converts if it looks like wrong layout |
+| **Disabled** | Only works with explicit manual text selection |
 
 ### Menu Bar
 
-LangSwitcher lives in your menu bar with a keyboard icon (⌨). Click it to:
+LangSwitcher lives in your menu bar with a keyboard icon. Click it to:
 
 - Convert selected text manually
 - See active keyboard layouts
@@ -90,14 +131,24 @@ LangSwitcher lives in your menu bar with a keyboard icon (⌨). Click it to:
 
 ### Settings
 
-Access settings from the menu bar icon → **Settings** (or `⌘,`):
+Access settings from the menu bar icon -> **Settings** (or `⌘,`):
 
 | Tab | Description |
 |-----|-------------|
-| **General** | Launch at login, sounds, notifications |
+| **General** | Launch at login, sounds, notifications, Smart Conversion mode, Layout Switch mode |
 | **Layouts** | View and refresh detected keyboard layouts |
 | **Hotkey** | Toggle double-shift or record a custom shortcut |
 | **Permissions** | Check and grant Accessibility access |
+| **Log** | View conversion history, label entries as correct/incorrect, export to JSON |
+
+### Conversion Log
+
+Every conversion is automatically saved to a local SQLite database (`~/Library/Application Support/LangSwitcher/conversion_log.sqlite`). In the **Log** tab you can:
+
+- Browse all past conversions (input -> output, layouts, mode, timestamp)
+- Rate each conversion as correct or incorrect (tri-state: unrated / correct / incorrect)
+- Export the labeled data as JSON for ML training or analysis
+- Delete individual entries or clear the entire log
 
 ## Supported Layouts
 
@@ -121,30 +172,38 @@ Adding a new layout is straightforward — see [Contributing](#contributing).
 LangSwitcher/
 ├── Sources/
 │   ├── App/
-│   │   ├── LangSwitcherApp.swift    # SwiftUI App entry point
-│   │   ├── AppDelegate.swift          # App lifecycle, hotkey registration
-│   │   └── StatusBarController.swift  # Menu bar icon and menu
+│   │   ├── LangSwitcherApp.swift       # SwiftUI App entry point
+│   │   ├── AppDelegate.swift           # App lifecycle, hotkey, conversion orchestration
+│   │   └── StatusBarController.swift   # Menu bar icon and menu
 │   ├── Views/
-│   │   ├── SettingsView.swift         # Settings window (tabs)
-│   │   ├── HotkeyRecorderView.swift   # Custom hotkey recorder
-│   │   ├── AboutView.swift            # About window
-│   │   └── PermissionsView.swift      # Accessibility permissions
+│   │   ├── SettingsView.swift          # Settings window (5 tabs)
+│   │   ├── ConversionLogView.swift     # Conversion log with data labeling
+│   │   ├── HotkeyRecorderView.swift    # Custom hotkey recorder
+│   │   ├── AboutView.swift             # About window
+│   │   └── PermissionsView.swift       # Accessibility permissions
 │   ├── Services/
-│   │   ├── LayoutMapper.swift         # Character mapping engine
-│   │   ├── KeyboardLayoutDetector.swift # System layout detection
-│   │   ├── TextConverter.swift        # High-level conversion orchestrator
-│   │   ├── HotkeyManager.swift        # Global hotkey registration
-│   │   ├── AccessibilityService.swift # Clipboard-based text replacement
-│   │   └── SettingsManager.swift      # UserDefaults persistence
+│   │   ├── LayoutMapper.swift          # Character mapping engine
+│   │   ├── KeyboardLayoutDetector.swift # System layout detection (Carbon TIS)
+│   │   ├── TextConverter.swift         # Conversion orchestrator + greedy algorithm
+│   │   ├── ConversionLogStore.swift    # SQLite-based conversion log storage
+│   │   ├── HotkeyManager.swift         # Global hotkey (double-shift + custom)
+│   │   ├── AccessibilityService.swift  # Clipboard-based text replacement
+│   │   └── SettingsManager.swift       # UserDefaults persistence
 │   └── Models/
-│       └── KeyboardLayout.swift       # Layout model & character maps
+│       ├── KeyboardLayout.swift        # Layout model & character maps
+│       └── ConversionLog.swift         # Conversion log entry model
 ├── Resources/
-│   └── Assets.xcassets                # App icons and colors
+│   └── Assets.xcassets                 # App icons and colors
+├── LangSwitcherTests/
+│   ├── LayoutMapperTests.swift         # 58 mapping tests
+│   └── TextConverterTests.swift        # 35 converter tests
 ├── .github/workflows/
-│   ├── build.yml                      # CI: build + DMG + release
-│   └── pages.yml                      # GitHub Pages deployment
+│   ├── build.yml                       # CI: test + build DMGs (Intel/ARM/Universal) + release
+│   └── pages.yml                       # GitHub Pages deployment
+├── screenshots/
+│   └── general.png                     # Settings General tab
 └── docs/
-    └── index.html                     # Project website
+    └── index.html                      # Project website
 ```
 
 ### How Conversion Works
@@ -152,24 +211,44 @@ LangSwitcher/
 ```
 Input: "ghbdtn" (typed on US layout when Russian was intended)
 
-1. Detect source layout → "US" (characters match US keyboard)
+1. Detect source layout -> "US" (characters match US keyboard map)
 2. For each character, find physical key position:
-   g → key at position [0x05]
-   h → key at position [0x04]
+   g -> key at position [0x05]
+   h -> key at position [0x04]
    ...
 3. Map physical key to target layout (Russian):
-   [0x05] → п
-   [0x04] → р
+   [0x05] -> п
+   [0x04] -> р
    ...
-4. Result: "привет"
+4. Apply punctuation preservation (non-letter -> non-letter stays as-is)
+5. Result: "привет"
 ```
 
 ### Key Design Decisions
 
-- **Clipboard-based replacement**: Uses `⌘C` → transform → `⌘V` approach for maximum app compatibility. Works in virtually any text field.
-- **No CGEvent tap**: Avoids `CGEventTap` which requires special entitlements and can be blocked by apps. Instead uses `NSEvent.addGlobalMonitorForEvents` for hotkey detection.
+- **Clipboard-based replacement**: Uses `⌘C` -> transform -> `⌘V` approach for maximum app compatibility. Works in virtually any text field.
+- **No CGEvent tap**: Avoids `CGEventTap` which requires special entitlements. Instead uses `NSEvent.addGlobalMonitorForEvents` for hotkey detection and `CGEvent` with `.hidSystemState` for keyboard simulation.
 - **Physical key mapping**: Maps characters through their physical key position, not Unicode translation tables. This is more reliable for non-standard layouts.
 - **No sandbox**: The app requires Accessibility access which is incompatible with App Sandbox.
+- **SQLite for logging**: Direct SQLite3 C API — no external dependencies. Data stays local for privacy.
+- **Greedy two-pass algorithm**: Pass 1 checks if the whole line is wrong-layout (all words switch script). Pass 2 scans right-to-left for mixed lines. The 70% threshold handles ambiguous cases.
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| **Language** | Swift 5 |
+| **UI Framework** | SwiftUI |
+| **Platform** | macOS 13+ (Ventura) |
+| **Input Detection** | Carbon (TISInputSource) |
+| **Text Manipulation** | Accessibility API + Pasteboard |
+| **Hotkey** | NSEvent global monitor + CGEvent |
+| **Settings** | UserDefaults |
+| **Conversion Log** | SQLite3 (C API, no dependencies) |
+| **CI/CD** | GitHub Actions |
+| **Distribution** | DMG (Intel + ARM + Universal) via GitHub Releases |
+| **Website** | GitHub Pages |
+| **Tests** | XCTest (93 tests) |
 
 ## Permissions
 
@@ -177,13 +256,14 @@ LangSwitcher requires **Accessibility** access to:
 - Read selected text (via simulated `⌘C`)
 - Replace text (via simulated `⌘V`)
 
-Grant access in **System Settings → Privacy & Security → Accessibility**.
+Grant access in **System Settings -> Privacy & Security -> Accessibility**.
 
 The app does **not**:
 - Log keystrokes
 - Send data to any server
 - Access files or network
 - Run in the background when quit
+- Collect any analytics or telemetry
 
 ## Contributing
 
@@ -191,8 +271,9 @@ Contributions are welcome! Here's how to add a new keyboard layout:
 
 1. Open `LangSwitcher/Sources/Models/KeyboardLayout.swift`
 2. Add a new static property to `LayoutCharacterMap` with the character mapping
-3. Add the pattern to `allMaps` array
-4. Test with the actual keyboard layout installed
+3. Add the pattern to `allMaps` array (**order matters** — specific patterns before generic ones)
+4. Add tests in `LangSwitcherTests/LayoutMapperTests.swift`
+5. Run tests: all 93+ must pass
 
 ```swift
 // Example: adding Italian layout
@@ -212,28 +293,22 @@ static let italian: [Character: Character] = {
 ```bash
 # Clone
 git clone https://github.com/reg2005/langSwitcher.git
-cd LangSwitcher
+cd langSwitcher
+
+# Run tests (required after every code change)
+xcodebuild test \
+  -project LangSwitcher.xcodeproj \
+  -scheme LangSwitcher \
+  -destination 'platform=macOS' \
+  CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO
 
 # Open in Xcode
 open LangSwitcher.xcodeproj
-
-# Build & Run
-# Press ⌘R in Xcode
 ```
 
-## Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| **Language** | Swift 5 |
-| **UI Framework** | SwiftUI |
-| **Platform** | macOS 13+ (Ventura) |
-| **Input Detection** | Carbon (TISInputSource) |
-| **Text Manipulation** | Accessibility API + Pasteboard |
-| **Hotkey** | NSEvent global monitor |
-| **Persistence** | UserDefaults |
-| **CI/CD** | GitHub Actions |
-| **Distribution** | DMG via GitHub Releases |
+See [AGENTS.md](AGENTS.md) for AI agent / contributor guidelines.
 
 ## License
 

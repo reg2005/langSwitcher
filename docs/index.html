@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LangSwitcher — Open-Source Keyboard Layout Converter for macOS</title>
-    <meta name="description" content="Free, open-source keyboard layout text converter for macOS. Select mistyped text, press a hotkey, get it converted instantly.">
+    <meta name="description" content="Free, open-source keyboard layout text converter for macOS. Select mistyped text, press a hotkey, get it converted instantly. Smart Conversion, Conversion Log, 6 layouts.">
     <style>
         :root {
             --bg: #0a0a0a;
@@ -175,6 +175,26 @@
             border-color: #333;
         }
 
+        /* Screenshot */
+        .screenshot-section {
+            margin: 0 auto 100px;
+            max-width: 640px;
+            text-align: center;
+        }
+
+        .screenshot-section img {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .screenshot-caption {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
         /* Demo */
         .demo {
             margin: 0 auto 120px;
@@ -305,6 +325,53 @@
             line-height: 1.6;
         }
 
+        /* Smart Conversion table */
+        .modes-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-top: 32px;
+        }
+
+        .modes-table th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            background: #111;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modes-table td {
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+        }
+
+        .modes-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .mode-badge.default {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
         /* Layouts */
         .layouts-table {
             width: 100%;
@@ -344,6 +411,47 @@
             border-radius: 100px;
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* Download section */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .download-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .download-card:hover {
+            border-color: #333;
+            transform: translateY(-2px);
+        }
+
+        .download-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .download-card .arch {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .download-card .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px 20px;
+            font-size: 14px;
         }
 
         /* Install */
@@ -409,6 +517,7 @@
             .hero p { font-size: 16px; }
             .features-grid { grid-template-columns: 1fr; }
             .install-steps { grid-template-columns: 1fr; }
+            .download-grid { grid-template-columns: 1fr; }
             .nav-links { display: none; }
         }
 
@@ -424,7 +533,7 @@
             }
         }
 
-        .hero, .demo, .section {
+        .hero, .demo, .section, .screenshot-section {
             animation: fadeInUp 0.6s ease-out;
         }
     </style>
@@ -435,13 +544,14 @@
 <nav>
     <div class="container">
         <a href="#" class="logo">
-            <span class="logo-icon">⌨</span>
+            <span class="logo-icon">&#x2328;</span>
             LangSwitcher
         </a>
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
+            <li><a href="#smart-conversion">Smart Conversion</a></li>
             <li><a href="#layouts">Layouts</a></li>
-            <li><a href="#install">Install</a></li>
+            <li><a href="#download">Download</a></li>
             <li><a href="https://github.com/reg2005/langSwitcher">GitHub</a></li>
         </ul>
     </div>
@@ -456,11 +566,11 @@
         </div>
         <h1>Fix mistyped text<br><span>in one keystroke</span></h1>
         <p>
-            Typed in the wrong keyboard layout? Select the text, press a hotkey, 
-            and LangSwitcher converts it instantly. No more retyping.
+            Typed in the wrong keyboard layout? Press <strong>&#x21E7;&#x21E7;</strong> (double Shift) 
+            and LangSwitcher converts it instantly. No selection needed &mdash; Smart Conversion handles it.
         </p>
         <div class="cta-group">
-            <a href="https://github.com/reg2005/langSwitcher/releases/latest" class="btn btn-primary">
+            <a href="#download" class="btn btn-primary">
                 Download for macOS
             </a>
             <a href="https://github.com/reg2005/langSwitcher" class="btn btn-secondary">
@@ -469,6 +579,14 @@
         </div>
     </div>
 </section>
+
+<!-- Screenshot -->
+<div class="container">
+    <div class="screenshot-section">
+        <img src="screenshots/general.png" alt="LangSwitcher Settings — General tab showing Smart Conversion and layout options">
+        <p class="screenshot-caption">Settings — General tab with Smart Conversion mode selector</p>
+    </div>
+</div>
 
 <!-- Demo -->
 <div class="container">
@@ -481,15 +599,15 @@
         <div class="demo-body">
             <div class="demo-step active">
                 <span class="step-num">1</span>
-                <span>You type: <span class="strikethrough">ghbdtn</span></span>
+                <span>You type: <span class="strikethrough">ghbdtn rfr ltkf</span></span>
             </div>
             <div class="demo-step active">
                 <span class="step-num">2</span>
-                <span>Select text, press <span class="kbd">⇧</span> <span class="kbd">⇧</span></span>
+                <span>Press <span class="kbd">&#x21E7;</span> <span class="kbd">&#x21E7;</span> (no selection needed)</span>
             </div>
             <div class="demo-step active">
                 <span class="step-num">3</span>
-                <span>Result: <span class="highlight">привет</span></span>
+                <span>Result: <span class="highlight">&#x043F;&#x0440;&#x0438;&#x0432;&#x0435;&#x0442; &#x043A;&#x0430;&#x043A; &#x0434;&#x0435;&#x043B;&#x0430;</span></span>
             </div>
         </div>
     </div>
@@ -504,36 +622,87 @@
         </div>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
+                <div class="feature-icon">&#x26A1;</div>
                 <h3>Instant Conversion</h3>
-                <p>Select text and press a hotkey. Conversion happens in milliseconds through clipboard-based replacement.</p>
+                <p>Press a hotkey and text is converted in milliseconds through clipboard-based replacement. Works in any app.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔍</div>
-                <h3>Auto-Detection</h3>
-                <p>Automatically detects which layout the text was typed in and converts to the other active layout.</p>
+                <div class="feature-icon">&#x1F9E0;</div>
+                <h3>Smart Conversion</h3>
+                <p>No need to select text. Greedy Line mode auto-detects where wrong layout begins and converts only what's needed.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">⌨</div>
-                <h3>Custom Hotkey</h3>
-                <p>Set any keyboard shortcut you prefer. Record it directly in settings with a visual recorder.</p>
+                <div class="feature-icon">&#x2328;</div>
+                <h3>Double Shift Hotkey</h3>
+                <p>Default hotkey: press Shift twice quickly. Or record any custom shortcut in settings.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>Multiple Layouts</h3>
-                <p>Supports English, Russian, Ukrainian, German, French, Spanish. Easy to add more.</p>
+                <div class="feature-icon">&#x1F4CA;</div>
+                <h3>Conversion Log</h3>
+                <p>Every conversion is logged to a local SQLite database. Rate as correct/incorrect. Export as JSON for ML training.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔒</div>
+                <div class="feature-icon">&#x1F30D;</div>
+                <h3>6 Layouts</h3>
+                <p>English, Russian, Ukrainian, German, French, Spanish. Auto-detected from system keyboard settings.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F512;</div>
                 <h3>Privacy First</h3>
-                <p>No data leaves your Mac. No analytics, no telemetry, no network access. Fully offline.</p>
+                <p>No data leaves your Mac. No analytics, no telemetry, no network access. Fully offline. Open source under MIT.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🛠️</div>
-                <h3>Open Source</h3>
-                <p>MIT licensed. Read the code, modify it, contribute. Built with SwiftUI for macOS.</p>
+                <div class="feature-icon">&#x1F4CC;</div>
+                <h3>Punctuation Preserved</h3>
+                <p>Symbols like ?, !, / stay unchanged during conversion. Only layout-specific characters are transformed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F6E0;&#xFE0F;</div>
+                <h3>Zero Dependencies</h3>
+                <p>Pure Swift, no external libraries, no dictionaries. Purely algorithmic detection based on physical key positions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x2705;</div>
+                <h3>93 Unit Tests</h3>
+                <p>Comprehensive test suite covering layout mapping, gibberish detection, greedy boundary detection, and conversion pipeline.</p>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- Smart Conversion -->
+<section class="section" id="smart-conversion">
+    <div class="container">
+        <div class="section-header">
+            <h2>Smart Conversion</h2>
+            <p>No more manually selecting text. LangSwitcher detects what needs converting automatically.</p>
+        </div>
+        <table class="modes-table">
+            <thead>
+                <tr>
+                    <th>Mode</th>
+                    <th>Behavior</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="mode-badge default">Greedy Line (default)</span></td>
+                    <td>Selects to line start, scans right-to-left to find where wrong layout begins, converts only the wrong portion</td>
+                    <td><code>ghbdtn rfr ltkf lheu</code> &rarr; <code>&#x043F;&#x0440;&#x0438;&#x0432;&#x0435;&#x0442; &#x043A;&#x0430;&#x043A; &#x0434;&#x0435;&#x043B;&#x0430; &#x0434;&#x0440;&#x0443;&#x0433;</code></td>
+                </tr>
+                <tr>
+                    <td><span class="mode-badge">Last Word</span></td>
+                    <td>Auto-selects only the last typed word, converts if it looks like wrong layout</td>
+                    <td><code>...lheu</code> &rarr; <code>...&#x0434;&#x0440;&#x0443;&#x0433;</code></td>
+                </tr>
+                <tr>
+                    <td><span class="mode-badge">Disabled</span></td>
+                    <td>Only works with explicit manual text selection</td>
+                    <td>Select text &rarr; &#x21E7;&#x21E7; &rarr; converted</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </section>
 
@@ -563,14 +732,14 @@
                 <tr>
                     <td>Russian</td>
                     <td><span class="lang-badge">RU</span></td>
-                    <td>ЙЦУКЕН</td>
-                    <td><code>привет мир</code></td>
+                    <td>&#x0419;&#x0426;&#x0423;&#x041A;&#x0415;&#x041D;</td>
+                    <td><code>&#x043F;&#x0440;&#x0438;&#x0432;&#x0435;&#x0442; &#x043C;&#x0438;&#x0440;</code></td>
                 </tr>
                 <tr>
                     <td>Ukrainian</td>
                     <td><span class="lang-badge">UK</span></td>
-                    <td>ЙЦУКЕН (UA)</td>
-                    <td><code>привіт світ</code></td>
+                    <td>&#x0419;&#x0426;&#x0423;&#x041A;&#x0415;&#x041D; (UA)</td>
+                    <td><code>&#x043F;&#x0440;&#x0438;&#x0432;&#x0456;&#x0442; &#x0441;&#x0432;&#x0456;&#x0442;</code></td>
                 </tr>
                 <tr>
                     <td>German</td>
@@ -595,6 +764,39 @@
     </div>
 </section>
 
+<!-- Download -->
+<section class="section" id="download">
+    <div class="container">
+        <div class="section-header">
+            <h2>Download</h2>
+            <p>Choose the right build for your Mac. All builds are unsigned &mdash; you may need to allow it in System Settings.</p>
+        </div>
+        <div class="download-grid">
+            <div class="download-card">
+                <h3>Apple Silicon</h3>
+                <p class="arch">M1 / M2 / M3 / M4</p>
+                <a href="https://github.com/reg2005/langSwitcher/releases/latest" class="btn btn-primary">
+                    arm64 DMG
+                </a>
+            </div>
+            <div class="download-card">
+                <h3>Intel</h3>
+                <p class="arch">x86_64</p>
+                <a href="https://github.com/reg2005/langSwitcher/releases/latest" class="btn btn-primary">
+                    x86_64 DMG
+                </a>
+            </div>
+            <div class="download-card">
+                <h3>Universal</h3>
+                <p class="arch">Both architectures</p>
+                <a href="https://github.com/reg2005/langSwitcher/releases/latest" class="btn btn-secondary">
+                    Universal DMG
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Installation -->
 <section class="section" id="install">
     <div class="container">
@@ -606,23 +808,18 @@
             <div class="install-step">
                 <div class="step-number">1</div>
                 <h3>Download</h3>
-                <p>Get the latest DMG from GitHub Releases.</p>
+                <p>Get the DMG for your architecture from GitHub Releases.</p>
             </div>
             <div class="install-step">
                 <div class="step-number">2</div>
                 <h3>Install</h3>
-                <p>Drag LangSwitcher to Applications. Grant Accessibility access.</p>
+                <p>Drag LangSwitcher to Applications. Grant Accessibility access when prompted.</p>
             </div>
             <div class="install-step">
                 <div class="step-number">3</div>
                 <h3>Use</h3>
-                <p>Select mistyped text and press ⇧⇧ (double Shift). Done.</p>
+                <p>Just press &#x21E7;&#x21E7; (double Shift). Smart Conversion handles the rest.</p>
             </div>
-        </div>
-        <div style="text-align: center; margin-top: 48px;">
-            <a href="https://github.com/reg2005/langSwitcher/releases/latest" class="btn btn-primary">
-                Download LangSwitcher
-            </a>
         </div>
     </div>
 </section>
@@ -635,12 +832,12 @@
         </div>
         <div class="features-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 600px; margin: 0 auto;">
             <div class="feature-card">
-                <div class="feature-icon">💻</div>
+                <div class="feature-icon">&#x1F4BB;</div>
                 <h3>macOS 13+</h3>
                 <p>Ventura or later. Apple Silicon and Intel supported.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔐</div>
+                <div class="feature-icon">&#x1F510;</div>
                 <h3>Accessibility</h3>
                 <p>Requires Accessibility permission to read and replace selected text.</p>
             </div>

@@ -8,10 +8,9 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    name: Build LangSwitcher
+  test:
+    name: Run Tests
     runs-on: macos-14
-    
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -29,7 +28,128 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    - name: Build
+  build-arm64:
+    name: Build (Apple Silicon)
+    needs: test
+    runs-on: macos-14
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+    - name: Build arm64
+      run: |
+        xcodebuild -project LangSwitcher.xcodeproj \
+          -scheme LangSwitcher \
+          -configuration Release \
+          -derivedDataPath build \
+          -arch arm64 \
+          ONLY_ACTIVE_ARCH=NO \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          build
+
+    - name: Create DMG (arm64)
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        DMG_NAME="LangSwitcher-${VERSION}-arm64.dmg"
+        
+        mkdir -p dmg_contents
+        cp -R "$APP_PATH" dmg_contents/
+        ln -s /Applications dmg_contents/Applications
+        
+        hdiutil create -volname "LangSwitcher" \
+          -srcfolder dmg_contents \
+          -ov -format UDZO \
+          "$DMG_NAME"
+        
+        echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
+
+    - name: Upload arm64 App
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-arm64-app
+        path: build/Build/Products/Release/LangSwitcher.app
+        if-no-files-found: error
+
+    - name: Upload arm64 DMG
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-arm64-dmg
+        path: "*.dmg"
+
+  build-x86_64:
+    name: Build (Intel)
+    needs: test
+    runs-on: macos-14
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+    - name: Build x86_64
+      run: |
+        xcodebuild -project LangSwitcher.xcodeproj \
+          -scheme LangSwitcher \
+          -configuration Release \
+          -derivedDataPath build \
+          -arch x86_64 \
+          ONLY_ACTIVE_ARCH=NO \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          build
+
+    - name: Create DMG (x86_64)
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        DMG_NAME="LangSwitcher-${VERSION}-x86_64.dmg"
+        
+        mkdir -p dmg_contents
+        cp -R "$APP_PATH" dmg_contents/
+        ln -s /Applications dmg_contents/Applications
+        
+        hdiutil create -volname "LangSwitcher" \
+          -srcfolder dmg_contents \
+          -ov -format UDZO \
+          "$DMG_NAME"
+        
+        echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
+
+    - name: Upload x86_64 App
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-x86_64-app
+        path: build/Build/Products/Release/LangSwitcher.app
+        if-no-files-found: error
+
+    - name: Upload x86_64 DMG
+      uses: actions/upload-artifact@v4
+      with:
+        name: LangSwitcher-x86_64-dmg
+        path: "*.dmg"
+
+  build-universal:
+    name: Build (Universal)
+    needs: test
+    runs-on: macos-14
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+    - name: Build Universal (arm64 + x86_64)
       run: |
         xcodebuild -project LangSwitcher.xcodeproj \
           -scheme LangSwitcher \
@@ -42,20 +162,17 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           build
 
-    - name: Create DMG
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Create DMG (universal)
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        DMG_NAME="LangSwitcher-$(echo ${{ github.ref_name }} | sed 's/^v//').dmg"
+        VERSION="${GITHUB_REF_NAME:-dev}"
+        VERSION="${VERSION#v}"
+        DMG_NAME="LangSwitcher-${VERSION}-universal.dmg"
         
-        # Create a temporary folder for the DMG contents
         mkdir -p dmg_contents
         cp -R "$APP_PATH" dmg_contents/
-        
-        # Create a symlink to /Applications
         ln -s /Applications dmg_contents/Applications
         
-        # Create the DMG
         hdiutil create -volname "LangSwitcher" \
           -srcfolder dmg_contents \
           -ov -format UDZO \
@@ -63,33 +180,45 @@ jobs:
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Upload Build Artifact
+    - name: Upload Universal App
       uses: actions/upload-artifact@v4
       with:
-        name: LangSwitcher
+        name: LangSwitcher-universal-app
         path: build/Build/Products/Release/LangSwitcher.app
         if-no-files-found: error
 
-    - name: Upload DMG Artifact
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Upload Universal DMG
       uses: actions/upload-artifact@v4
       with:
-        name: LangSwitcher-DMG
+        name: LangSwitcher-universal-dmg
         path: "*.dmg"
 
   release:
     name: Create Release
-    needs: build
+    needs: [build-arm64, build-x86_64, build-universal]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
 
     steps:
-    - name: Download DMG
+    - name: Download arm64 DMG
       uses: actions/download-artifact@v4
       with:
-        name: LangSwitcher-DMG
+        name: LangSwitcher-arm64-dmg
+        path: dmgs/
+
+    - name: Download x86_64 DMG
+      uses: actions/download-artifact@v4
+      with:
+        name: LangSwitcher-x86_64-dmg
+        path: dmgs/
+
+    - name: Download Universal DMG
+      uses: actions/download-artifact@v4
+      with:
+        name: LangSwitcher-universal-dmg
+        path: dmgs/
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
@@ -98,16 +227,30 @@ jobs:
         body: |
           ## LangSwitcher ${{ github.ref_name }}
           
+          ### Downloads
+          
+          | Architecture | File |
+          |---|---|
+          | **Apple Silicon** (M1/M2/M3/M4) | `LangSwitcher-*-arm64.dmg` |
+          | **Intel** (x86_64) | `LangSwitcher-*-x86_64.dmg` |
+          | **Universal** (both) | `LangSwitcher-*-universal.dmg` |
+          
           ### Installation
-          1. Download the `.dmg` file below
+          1. Download the `.dmg` file for your Mac architecture
           2. Open the DMG and drag LangSwitcher to Applications
           3. Launch LangSwitcher from Applications
-          4. Grant Accessibility permission when prompted
+          4. Grant **Accessibility** permission when prompted (System Settings -> Privacy & Security -> Accessibility)
           5. Press **⇧⇧** (double Shift) to convert selected text
+          
+          ### What's New
+          - Smart Conversion modes (Greedy Line, Last Word, Disabled)
+          - Conversion Log with SQLite storage and data labeling (correct/incorrect)
+          - JSON export for training data
+          - Punctuation preservation during conversion
+          - 93 unit tests
           
           ### Requirements
           - macOS 13.0 (Ventura) or later
-          - Apple Silicon or Intel Mac
         draft: false
         prerelease: false
-        files: "*.dmg"
+        files: dmgs/*.dmg
