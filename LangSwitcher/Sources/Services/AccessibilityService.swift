@@ -9,13 +9,16 @@ final class AccessibilityService {
     
     /// Check if the app has accessibility permissions
     static var hasAccessibilityPermission: Bool {
-        AXIsProcessTrusted()
+        let trusted = AXIsProcessTrusted()
+        NSLog("[LangSwitcher] AXIsProcessTrusted() = \(trusted), bundle = \(Bundle.main.bundlePath)")
+        return trusted
     }
     
     /// Request accessibility permissions (opens System Preferences)
     static func requestAccessibilityPermission() {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        AXIsProcessTrustedWithOptions(options)
+        let result = AXIsProcessTrustedWithOptions(options)
+        NSLog("[LangSwitcher] AXIsProcessTrustedWithOptions(prompt=true) = \(result)")
     }
     
     // MARK: - Selected Text Conversion

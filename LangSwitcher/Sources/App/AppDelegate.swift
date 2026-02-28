@@ -12,6 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var textConverter = TextConverter(settingsManager: settingsManager)
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NSLog("[LangSwitcher] App launched. Bundle: \(Bundle.main.bundlePath)")
+        NSLog("[LangSwitcher] Executable: \(Bundle.main.executablePath ?? "unknown")")
+        NSLog("[LangSwitcher] PID: \(ProcessInfo.processInfo.processIdentifier)")
+        
         // Setup status bar
         statusBarController = StatusBarController(settingsManager: settingsManager)
         statusBarController?.onConvertAction = { [weak self] in
@@ -21,8 +25,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Register hotkey
         registerHotkey()
         
-        // Check accessibility permissions
-        if !AccessibilityService.hasAccessibilityPermission {
+        // Check accessibility permissions and log status
+        let trusted = AccessibilityService.hasAccessibilityPermission
+        NSLog("[LangSwitcher] Initial AXIsProcessTrusted = \(trusted)")
+        if !trusted {
+            NSLog("[LangSwitcher] Requesting accessibility permission prompt...")
             AccessibilityService.requestAccessibilityPermission()
         }
         
@@ -65,14 +72,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Core Conversion Logic
     
+    /// Track whether we've already shown the permission alert this session
+    private var hasShownPermissionAlert = false
+    
     func performConversion() {
-        guard AccessibilityService.hasAccessibilityPermission else {
-            NSLog("[LangSwitcher] No accessibility permission")
-            showAccessibilityAlert()
-            return
-        }
+        let hasPerm = AccessibilityService.hasAccessibilityPermission
+        NSLog("[LangSwitcher] performConversion() called, hasAccessibilityPermission=\(hasPerm)")
         
-        NSLog("[LangSwitcher] performConversion() called")
+        if !hasPerm {
+            NSLog("[LangSwitcher] AXIsProcessTrusted=false. Will attempt conversion anyway (CGEvent may work with Input Monitoring).")
+            if !hasShownPermissionAlert {
+                hasShownPermissionAlert = true
+                // Don't block — just log. User already granted permission but macOS may
+                // report false if the binary changed (rebuild from Xcode) or if permission
+                // was granted for a different path. We'll try the conversion regardless.
+                NSLog("[LangSwitcher] TIP: If conversion doesn't work, remove the app from Accessibility list in System Settings and re-add it. Also check Input Monitoring.")
+            }
+        }
         
         // Try clipboard-based approach first (works when text is selected)
         let success = accessibilityService.getAndReplaceSelectedText { [weak self] (text: String) -> String? in
@@ -131,10 +147,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = "Accessibility Access Required"
-        alert.informativeText = "LangSwitcher needs Accessibility permission to read and replace text.\n\nGo to System Settings → Privacy & Security → Accessibility and enable LangSwitcher.\n\nIf you already granted permission, try removing and re-adding the app in the list."
+        alert.informativeText = """
+        LangSwitcher needs Accessibility permission to read and replace text.
+        
+        Go to System Settings → Privacy & Security → Accessibility and enable LangSwitcher.
+        
+        If running from Xcode: add the built app from DerivedData or add Xcode itself.
+        
+        If you already granted permission but it still doesn't work:
+        1. Remove LangSwitcher from the Accessibility list
+        2. Re-add it
+        3. Restart the app
+        
+        Also check: Privacy & Security → Input Monitoring — LangSwitcher may need to be listed there too.
+        """
         alert.alertStyle = .warning
         alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: "Continue Anyway")
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
