@@ -134,8 +134,8 @@ final class StatusBarController {
             .environmentObject(settingsManager)
         
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 520, height: 400),
-            styleMask: [.titled, .closable, .miniaturizable],
+            contentRect: NSRect(x: 0, y: 0, width: 580, height: 520),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )

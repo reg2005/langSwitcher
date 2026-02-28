@@ -6,6 +6,7 @@ import UserNotifications
 final class AppDelegate: NSObject, NSApplicationDelegate {
     
     let settingsManager = SettingsManager.shared
+    let conversionLogStore = ConversionLogStore.shared
     private var statusBarController: StatusBarController?
     private let hotkeyManager = HotkeyManager()
     private let accessibilityService = AccessibilityService()
@@ -91,9 +92,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         // Try clipboard-based approach first (works when text is selected)
+        var capturedInput: String?
+        var capturedOutput: String?
         let success = accessibilityService.getAndReplaceSelectedText { [weak self] (text: String) -> String? in
             NSLog("[LangSwitcher] getAndReplaceSelectedText got text: '\(text)' (len=\(text.count))")
+            capturedInput = text
             let result = self?.textConverter.convertSelectedText(text)
+            capturedOutput = result
             NSLog("[LangSwitcher] convertSelectedText returned: \(result ?? "nil")")
             return result
         }
@@ -101,6 +106,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if success {
             NSLog("[LangSwitcher] Direct conversion succeeded")
             settingsManager.incrementConversionCount()
+            logConversion(input: capturedInput, output: capturedOutput, mode: "direct")
             playFeedback()
         } else {
             NSLog("[LangSwitcher] No selected text, trying smart conversion after short delay...")
@@ -130,35 +136,67 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     /// Last Word mode: select one word left, convert if it looks wrong
     private func performLastWordConversion() {
+        var capturedInput: String?
+        var capturedOutput: String?
         let success = accessibilityService.selectAndReplaceLastWord { [weak self] (text: String) -> String? in
             guard let self = self else { return nil }
             NSLog("[LangSwitcher] lastWord got: '\(text)'")
             
             if self.textConverter.looksLikeWrongLayout(text) {
-                return self.textConverter.convertSelectedText(text)
+                capturedInput = text
+                let result = self.textConverter.convertSelectedText(text)
+                capturedOutput = result
+                return result
             }
             return nil
         }
         
         if success {
             settingsManager.incrementConversionCount()
+            logConversion(input: capturedInput, output: capturedOutput, mode: "lastWord")
             playFeedback()
         }
     }
     
     /// Greedy Line mode: select to line start, find boundary, convert wrong-layout tail
     private func performGreedyLineConversion() {
+        var capturedInput: String?
+        var capturedOutput: String?
         let success = accessibilityService.selectLineAndReplace { [weak self] (lineText: String) -> String? in
             guard let self = self else { return nil }
             NSLog("[LangSwitcher] greedyLine got line: '\(lineText)' (len=\(lineText.count))")
             
-            return self.textConverter.convertLineGreedy(lineText)
+            capturedInput = lineText
+            let result = self.textConverter.convertLineGreedy(lineText)
+            capturedOutput = result
+            return result
         }
         
         if success {
             settingsManager.incrementConversionCount()
+            logConversion(input: capturedInput, output: capturedOutput, mode: "greedyLine")
             playFeedback()
         }
+    }
+    
+    // MARK: - Conversion Logging
+    
+    private func logConversion(input: String?, output: String?, mode: String) {
+        guard let input = input, let output = output else { return }
+        
+        let layouts = settingsManager.enabledLayouts
+        let layoutIDs = layouts.map(\.id)
+        
+        let sourceLayout = LayoutMapper.detectSourceLayout(text: input, candidateLayouts: layoutIDs) ?? "unknown"
+        let targetLayout = layouts.first(where: { $0.id != sourceLayout })?.id ?? "unknown"
+        
+        conversionLogStore.log(
+            inputText: input,
+            outputText: output,
+            sourceLayout: sourceLayout,
+            targetLayout: targetLayout,
+            conversionMode: mode
+        )
     }
     
     private func playFeedback() {

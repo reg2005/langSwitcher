@@ -32,8 +32,14 @@ struct SettingsView: View {
                     Label("Permissions", systemImage: "lock.shield")
                 }
                 .tag(3)
+            
+            ConversionLogView(logStore: ConversionLogStore.shared)
+                .tabItem {
+                    Label("Log", systemImage: "list.bullet.rectangle")
+                }
+                .tag(4)
         }
-        .frame(width: 520, height: 480)
+        .frame(width: 580, height: 520)
         .padding()
     }
 }
