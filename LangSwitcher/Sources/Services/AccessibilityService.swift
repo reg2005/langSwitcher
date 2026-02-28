@@ -85,7 +85,8 @@ final class AccessibilityService {
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
-            NSLog("[LangSwitcher] selectLineAndReplace: no text copied")
+            NSLog("[LangSwitcher] selectLineAndReplace: no text copied, deselecting")
+            simulateRightArrow()
             restorePasteboard(savedContents)
             return false
         }
@@ -135,7 +136,8 @@ final class AccessibilityService {
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
-            NSLog("[LangSwitcher] selectAndReplaceLastWord: no text copied after selection+copy")
+            NSLog("[LangSwitcher] selectAndReplaceLastWord: no text copied after selection+copy, deselecting")
+            simulateRightArrow()
             restorePasteboard(savedContents)
             return false
         }

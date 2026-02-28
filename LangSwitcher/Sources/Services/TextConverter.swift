@@ -119,26 +119,13 @@ final class TextConverter {
     ///
     /// Algorithm (right to left, no dictionary):
     /// 1. Split text into tokens (words + separators)
-    /// 2. For each word from right to left, check if it "switches script" after conversion
-    /// 3. Stop when we find a word that does NOT convert (it's already correct)
-    /// 4. Handle single-char tokens (like "b" = "и") by checking context
+    /// 2. For each word from right to left, check if it looks like gibberish
+    ///    (wrong-layout text has unusual letter patterns for its script)
+    /// 3. Stop when we find a word that looks like a normal word
     ///
-    /// Example: "Как дел? Сказа John b gjdtcbk nhe,re"
-    ///   - "nhe,re" → Latin→Cyrillic ✓
-    ///   - "gjdtcbk" → Latin→Cyrillic ✓
-    ///   - "b" → single Latin char, context says convert ✓ ("и")
-    ///   - "John" → Latin→Cyrillic? "Олры" — still Cyrillic, but hmm...
-    ///     Actually "John" is a real name, but without dictionary we check:
-    ///     does it look like wrong layout? "John" → "Олры" — yes converts to Cyrillic,
-    ///     but the user intended "John". We handle this by checking: if the word
-    ///     BEFORE the wrong-layout region is in a DIFFERENT script, we stop there.
-    ///
-    /// Refined algorithm: scan right-to-left. A word is "wrong layout" if:
-    ///   - It's predominantly one script (Latin/Cyrillic)
-    ///   - Converting it produces predominantly the OTHER script
-    ///   - The word contains only characters from the source layout map
-    ///
-    /// We build the longest contiguous run of "wrong layout" words from the right.
+    /// Key insight: "ghbdtn" (intended "привет") has unusual consonant clusters
+    /// for English, while "John" or "the" look like normal English words.
+    /// We combine script-switch detection with a gibberish score.
     func findWrongLayoutBoundary(in text: String) -> (keep: String, convert: String)? {
         let layouts = settingsManager.enabledLayouts
         guard layouts.count >= 2 else { return nil }
@@ -151,6 +138,7 @@ final class TextConverter {
         
         // Scan from right to left, find the longest tail of "wrong layout" tokens
         var wrongStartIndex = tokens.count // nothing wrong yet
+        var foundAtLeastOneWrongWord = false
         
         for i in stride(from: tokens.count - 1, through: 0, by: -1) {
             let token = tokens[i]
@@ -160,8 +148,11 @@ final class TextConverter {
                 continue
             }
             
-            if looksLikeWrongLayout(token) {
+            // For boundary detection in greedy mode, use the enhanced check
+            // that combines script-switch with gibberish scoring
+            if looksLikeWrongLayoutForBoundary(token) {
                 wrongStartIndex = i
+                foundAtLeastOneWrongWord = true
                 NSLog("[LangSwitcher] findWrongLayoutBoundary: token[\(i)] '\(token)' = wrong layout")
             } else {
                 NSLog("[LangSwitcher] findWrongLayoutBoundary: token[\(i)] '\(token)' = OK, stopping")
@@ -169,25 +160,13 @@ final class TextConverter {
             }
         }
         
-        guard wrongStartIndex < tokens.count else {
+        guard foundAtLeastOneWrongWord, wrongStartIndex < tokens.count else {
             NSLog("[LangSwitcher] findWrongLayoutBoundary: no wrong-layout tokens found")
             return nil
         }
         
-        // Now include leading whitespace/punctuation into the "wrong" region
-        // (the space before the wrong region should stay with the correct text)
-        // Actually, find the actual split point: wrong region starts at wrongStartIndex,
-        // but we want to include separators that are BETWEEN wrong words.
-        // The keep/convert split should be right before the first wrong word.
-        
-        // Walk backwards from wrongStartIndex to skip leading whitespace into keep portion
-        var splitIndex = wrongStartIndex
-        // Include any whitespace immediately before the wrong region in the "keep" portion
-        // Actually we want to split cleanly: keep = tokens[0..<splitIndex], convert = tokens[splitIndex...]
-        // But we should check if there's whitespace at splitIndex-1 that should stay in "keep"
-        
-        let keepTokens = tokens[0..<splitIndex]
-        let convertTokens = tokens[splitIndex...]
+        let keepTokens = tokens[0..<wrongStartIndex]
+        let convertTokens = tokens[wrongStartIndex...]
         
         let keep = keepTokens.joined()
         let convert = convertTokens.joined()
@@ -216,6 +195,156 @@ final class TextConverter {
         let result = boundary.keep + converted
         NSLog("[LangSwitcher] convertLineGreedy: '\(text)' → '\(result)'")
         return result
+    }
+    
+    // MARK: - Enhanced Wrong Layout Detection (for Greedy Boundary)
+    
+    /// Enhanced wrong-layout check for boundary detection in greedy mode.
+    /// Unlike the basic `looksLikeWrongLayout()`, this also checks if the word
+    /// looks like gibberish in its source script — which helps distinguish
+    /// real English words like "John" from wrong-layout gibberish like "gjdtcbk".
+    ///
+    /// A word is considered wrong-layout if:
+    /// 1. Converting it switches script (Latin→Cyrillic or vice versa) — basic check
+    /// 2. AND the word looks like gibberish in its current script (high consonant
+    ///    density, unusual bigrams, etc.)
+    ///
+    /// Single-character words (like "b" → "и") are treated specially:
+    /// they are considered wrong layout only in the context of adjacent wrong words.
+    private func looksLikeWrongLayoutForBoundary(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        
+        // Single character: too ambiguous on its own.
+        // We allow it to be "wrong" only if the basic script-switch check passes,
+        // because the right-to-left scan will only reach single chars if
+        // multi-char wrong words were already found to the right.
+        // However, single chars at the LEFT edge should not extend the region.
+        let letterCount = trimmed.filter { $0.isLetter }.count
+        if letterCount <= 1 {
+            // For single chars, use the basic check but it's fine —
+            // the scan stops when it hits a non-wrong word, so single chars
+            // only extend an already-identified wrong region.
+            return looksLikeWrongLayout(trimmed)
+        }
+        
+        // First: must pass the basic script-switch check
+        guard looksLikeWrongLayout(trimmed) else {
+            return false
+        }
+        
+        // Second: check if the word looks like gibberish in its current script.
+        // Real English words have vowels, normal bigram patterns.
+        // Wrong-layout gibberish like "ghbdtn", "gjdtcbk" has weird patterns.
+        let isLatin = trimmed.filter({ $0.isLetter }).allSatisfy { $0.isASCII }
+        
+        if isLatin {
+            // Check if this looks like a normal English word
+            if looksLikeNormalEnglishWord(trimmed) {
+                NSLog("[LangSwitcher] looksLikeWrongLayoutForBoundary: '\(trimmed)' looks like normal English, skipping")
+                return false
+            }
+        } else {
+            // For Cyrillic: check if it looks like a normal Russian/Ukrainian word
+            if looksLikeNormalCyrillicWord(trimmed) {
+                NSLog("[LangSwitcher] looksLikeWrongLayoutForBoundary: '\(trimmed)' looks like normal Cyrillic, skipping")
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    /// Heuristic: does this Latin word look like a plausible English word?
+    /// English words have vowels, don't start with certain clusters, etc.
+    /// Returns true for words like "John", "the", "hello", "said".
+    /// Returns false for gibberish like "ghbdtn", "gjdtcbk", "nhe,re".
+    private func looksLikeNormalEnglishWord(_ word: String) -> Bool {
+        let lower = word.lowercased()
+        let letters = lower.filter { $0.isLetter }
+        guard letters.count >= 2 else { return true } // single chars are ambiguous, assume OK
+        
+        let vowels: Set<Character> = ["a", "e", "i", "o", "u", "y"]
+        let vowelCount = letters.filter { vowels.contains($0) }.count
+        let vowelRatio = Double(vowelCount) / Double(letters.count)
+        
+        // English words typically have 20-60% vowels.
+        // Gibberish like "ghbdtn" (0 vowels in 6 chars = 0%) or "gjdtcbk" (0/7 = 0%)
+        // While "John" has 1/4 = 25%, "hello" has 2/5 = 40%
+        if vowelRatio < 0.12 && letters.count >= 3 {
+            NSLog("[LangSwitcher] looksLikeNormalEnglishWord: '\(word)' vowelRatio=\(vowelRatio) — gibberish")
+            return false
+        }
+        
+        // Count max consecutive consonants
+        var maxConsonants = 0
+        var currentConsonants = 0
+        for ch in letters {
+            if vowels.contains(ch) {
+                maxConsonants = max(maxConsonants, currentConsonants)
+                currentConsonants = 0
+            } else {
+                currentConsonants += 1
+            }
+        }
+        maxConsonants = max(maxConsonants, currentConsonants)
+        
+        // English rarely has 4+ consecutive consonants (exceptions: "strengths" = 5)
+        // But gibberish like "ghbdtn" has 6, "gjdtcbk" has 7
+        if maxConsonants >= 4 && letters.count >= 4 {
+            NSLog("[LangSwitcher] looksLikeNormalEnglishWord: '\(word)' maxConsonants=\(maxConsonants) — gibberish")
+            return false
+        }
+        
+        // Short words (2-3 letters) with at least one vowel are likely real words
+        if letters.count <= 3 && vowelCount >= 1 {
+            return true
+        }
+        
+        NSLog("[LangSwitcher] looksLikeNormalEnglishWord: '\(word)' vowelRatio=\(vowelRatio) maxConsonants=\(maxConsonants) — normal")
+        return true
+    }
+    
+    /// Heuristic: does this Cyrillic word look like a plausible Russian/Ukrainian word?
+    /// Similar vowel-ratio check adapted for Cyrillic.
+    private func looksLikeNormalCyrillicWord(_ word: String) -> Bool {
+        let letters = word.filter { $0.isLetter }
+        guard letters.count >= 2 else { return true }
+        
+        let cyrillicVowels: Set<Character> = ["а", "е", "ё", "и", "о", "у", "ы", "э", "ю", "я",
+                                                "і", "ї", "є"] // Ukrainian vowels
+        let vowelCount = letters.filter { cyrillicVowels.contains($0) }.count
+        let vowelRatio = Double(vowelCount) / Double(letters.count)
+        
+        // Russian words typically have ~40% vowels.
+        // Gibberish typed on Russian layout when meaning English would look like:
+        // "руддщ" (hello) — р,у,д,д,щ — 1 vowel in 5 = 20% — borderline
+        // "ьфшт" (main) — ь,ф,ш,т — 0 vowels in 4 = 0%
+        if vowelRatio < 0.10 && letters.count >= 3 {
+            NSLog("[LangSwitcher] looksLikeNormalCyrillicWord: '\(word)' vowelRatio=\(vowelRatio) — gibberish")
+            return false
+        }
+        
+        // Count max consecutive consonants in Cyrillic
+        var maxConsonants = 0
+        var currentConsonants = 0
+        for ch in letters {
+            if cyrillicVowels.contains(ch) {
+                maxConsonants = max(maxConsonants, currentConsonants)
+                currentConsonants = 0
+            } else {
+                currentConsonants += 1
+            }
+        }
+        maxConsonants = max(maxConsonants, currentConsonants)
+        
+        // Russian can have 3-4 consonant clusters ("встр", "здр") but rarely 5+
+        if maxConsonants >= 5 && letters.count >= 4 {
+            NSLog("[LangSwitcher] looksLikeNormalCyrillicWord: '\(word)' maxConsonants=\(maxConsonants) — gibberish")
+            return false
+        }
+        
+        return true
     }
     
     // MARK: - Tokenization
