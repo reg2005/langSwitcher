@@ -74,12 +74,12 @@ struct GeneralSettingsTab: View {
             Section(l10n.t("general.smartConversion")) {
                 Picker(l10n.t("general.mode"), selection: $settingsManager.smartConversionMode) {
                     ForEach(SmartConversionMode.allCases, id: \.self) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(smartModeDisplayName(mode)).tag(mode)
                     }
                 }
                 .pickerStyle(.radioGroup)
                 
-                Text(settingsManager.smartConversionMode.description)
+                Text(smartModeDescription(settingsManager.smartConversionMode))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 2)
@@ -88,12 +88,12 @@ struct GeneralSettingsTab: View {
             Section(l10n.t("general.layoutSwitch")) {
                 Picker(l10n.t("general.mode"), selection: $settingsManager.layoutSwitchMode) {
                     ForEach(LayoutSwitchMode.allCases, id: \.self) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(layoutSwitchModeDisplayName(mode)).tag(mode)
                     }
                 }
                 .pickerStyle(.radioGroup)
                 
-                Text(settingsManager.layoutSwitchMode.description)
+                Text(layoutSwitchModeDescription(settingsManager.layoutSwitchMode))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 2)
@@ -140,6 +140,41 @@ struct GeneralSettingsTab: View {
             }
         }
         .formStyle(.grouped)
+    }
+    
+    // MARK: - Mode Display Helpers
+    // Use l10n from @EnvironmentObject so SwiftUI re-renders on language change
+    
+    private func smartModeDisplayName(_ mode: SmartConversionMode) -> String {
+        switch mode {
+        case .lastWord: return l10n.t("smartMode.lastWord.name")
+        case .greedyLine: return l10n.t("smartMode.greedyLine.name")
+        case .disabled: return l10n.t("smartMode.disabled.name")
+        }
+    }
+    
+    private func smartModeDescription(_ mode: SmartConversionMode) -> String {
+        switch mode {
+        case .lastWord: return l10n.t("smartMode.lastWord.desc")
+        case .greedyLine: return l10n.t("smartMode.greedyLine.desc")
+        case .disabled: return l10n.t("smartMode.disabled.desc")
+        }
+    }
+    
+    private func layoutSwitchModeDisplayName(_ mode: LayoutSwitchMode) -> String {
+        switch mode {
+        case .always: return l10n.t("layoutSwitchMode.always.name")
+        case .ifLastWordConverted: return l10n.t("layoutSwitchMode.ifLastWord.name")
+        case .ifAnyWordConverted: return l10n.t("layoutSwitchMode.ifAnyWord.name")
+        }
+    }
+    
+    private func layoutSwitchModeDescription(_ mode: LayoutSwitchMode) -> String {
+        switch mode {
+        case .always: return l10n.t("layoutSwitchMode.always.desc")
+        case .ifLastWordConverted: return l10n.t("layoutSwitchMode.ifLastWord.desc")
+        case .ifAnyWordConverted: return l10n.t("layoutSwitchMode.ifAnyWord.desc")
+        }
     }
 }
 

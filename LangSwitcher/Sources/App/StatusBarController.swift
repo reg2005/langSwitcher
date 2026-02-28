@@ -34,6 +34,7 @@ final class StatusBarController {
         if let button = statusItem.button {
             let image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LangSwitcher")
             image?.isTemplate = true
+            button.image = image
             let tooltip = l10n.t("menu.tooltip").replacingOccurrences(of: "%@", with: settingsManager.hotkeyDescription)
             button.toolTip = tooltip
         }
@@ -138,7 +139,7 @@ final class StatusBarController {
         
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 580, height: 520),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
         )
@@ -147,6 +148,8 @@ final class StatusBarController {
         window.contentView = NSHostingView(rootView: settingsView)
         window.isReleasedWhenClosed = false
         window.level = .floating
+        // Prevent macOS 15+ from converting TabView into a toolbar dropdown
+        window.toolbar = nil
         window.makeKeyAndOrderFront(nil)
         
         settingsWindow = window
