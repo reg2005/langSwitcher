@@ -495,12 +495,106 @@ final class LayoutMapperTests: XCTestCase {
     }
     
     func testConvertSpecialChars_backtick() {
-        // '`' in US QWERTY → 'ё' in Russian
+        // '`' in US QWERTY → 'ё' in Russian (non-letter → letter = converts)
         let result = LayoutMapper.convert(
             text: "`",
             from: "com.apple.keylayout.US",
             to: "com.apple.keylayout.Russian"
         )
         XCTAssertEqual(result, "ё")
+    }
+    
+    // MARK: - Punctuation preservation
+    // Non-letter chars that map to non-letter chars are preserved as-is.
+    // This prevents "?" becoming "," or "/" becoming "." during conversion.
+    
+    func testPunctuationPreserved_questionMark() {
+        // '?' (Shift+/) in QWERTY maps to ',' in Russian (Shift+/ physical key)
+        // But both are non-letter → preserve '?'
+        let result = LayoutMapper.convert(
+            text: "ghbdtn?",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "привет?")
+    }
+    
+    func testPunctuationPreserved_questionMarkAlone() {
+        let result = LayoutMapper.convert(
+            text: "?",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "?")
+    }
+    
+    func testPunctuationPreserved_exclamationMark() {
+        // '!' (Shift+1) in QWERTY maps to '!' in Russian (same) — both non-letter → preserve
+        let result = LayoutMapper.convert(
+            text: "ghbdtn!",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "привет!")
+    }
+    
+    func testPunctuationPreserved_slash() {
+        // '/' in QWERTY maps to '.' in Russian — both non-letter → preserve '/'
+        let result = LayoutMapper.convert(
+            text: "/",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "/")
+    }
+    
+    func testPunctuationStillConverts_semicolonToLetter() {
+        // ';' → 'ж' (non-letter → letter) — must still convert
+        let result = LayoutMapper.convert(
+            text: ";",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "ж")
+    }
+    
+    func testPunctuationStillConverts_commaToLetter() {
+        // ',' → 'б' (non-letter → letter) — must still convert
+        let result = LayoutMapper.convert(
+            text: ",",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "б")
+    }
+    
+    func testPunctuationStillConverts_dotToLetter() {
+        // '.' → 'ю' (non-letter → letter) — must still convert
+        let result = LayoutMapper.convert(
+            text: ".",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "ю")
+    }
+    
+    func testPunctuationPreserved_fullPhrase() {
+        // "ghbdtn rfr ltkf?" should become "привет как дела?" (not "привет как дела,")
+        let result = LayoutMapper.convert(
+            text: "ghbdtn rfr ltkf?",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "привет как дела?")
+    }
+    
+    func testPunctuationPreserved_numbersUnchanged() {
+        // Numbers are non-letter → non-letter, so they stay as-is (same as before)
+        let result = LayoutMapper.convert(
+            text: "123",
+            from: "com.apple.keylayout.US",
+            to: "com.apple.keylayout.Russian"
+        )
+        XCTAssertEqual(result, "123")
     }
 }

@@ -29,12 +29,24 @@ final class LayoutMapper {
         // For each character in input:
         // 1. Find which physical key produced it in source layout (reverse lookup)
         // 2. Map that physical key to target layout character
+        //
+        // Punctuation preservation rule:
+        // If the source char is NOT a letter and the converted result is also NOT a letter,
+        // keep the original character. This handles cases like "?" -> "," where the user
+        // intentionally typed "?" and it should stay "?", not become ",".
+        // But ";" -> "ж" still converts because the target is a letter.
         var result = ""
         var unmappedCount = 0
         for char in text {
             if let physicalKey = reverseSource[char],
                let targetChar = targetMap[physicalKey] {
-                result.append(targetChar)
+                // Punctuation preservation: if source is non-letter and target is also non-letter,
+                // the user likely typed this punctuation intentionally — keep it as-is
+                if !char.isLetter && !targetChar.isLetter {
+                    result.append(char)
+                } else {
+                    result.append(targetChar)
+                }
             } else {
                 // Character not in mapping (e.g., space, numbers that don't change, emoji)
                 result.append(char)
