@@ -27,7 +27,7 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 - **Auto-detection** — automatically detects which layout the text was typed in
 - **System keyboard integration** — uses your installed system keyboard layouts
 - **Double Shift hotkey** — press `⇧⇧` (Shift twice quickly) to convert, or set a custom shortcut
-- **Conversion Log** — every conversion is logged to a local SQLite database with a UI for reviewing and labeling (correct/incorrect) for future ML training
+- **Conversion Log** — optionally log conversions to a local SQLite database (disabled by default for privacy). Review and label entries (correct/incorrect) for future ML training
 - **JSON export** — export conversion logs for data analysis or model training
 - **Menu bar app** — lives quietly in your status bar, always ready
 - **Multiple layouts** — supports English, Russian, German, French, Spanish (5 layouts)
@@ -145,12 +145,16 @@ Access settings from the menu bar icon -> **Settings** (or `⌘,`):
 
 ### Conversion Log
 
-Every conversion is automatically saved to a local SQLite database (`~/Library/Application Support/LangSwitcher/conversion_log.sqlite`). In the **Log** tab you can:
+Conversion logging is **disabled by default** for your privacy. You can enable it in **Settings -> General -> Conversion Logging**.
+
+When enabled, conversions are saved to a local SQLite database (`~/Library/Application Support/LangSwitcher/conversion_log.sqlite`). You can configure the maximum number of stored entries (default: 100, or 0 for unlimited). In the **Log** tab you can:
 
 - Browse all past conversions (input -> output, layouts, mode, timestamp)
 - Rate each conversion as correct or incorrect (tri-state: unrated / correct / incorrect)
 - Export the labeled data as JSON for ML training or analysis
 - Delete individual entries or clear the entire log
+
+**No data ever leaves your Mac.** The conversion log is stored purely locally and is never transmitted anywhere.
 
 ## Supported Layouts
 
@@ -270,10 +274,12 @@ Grant access in **System Settings -> Privacy & Security -> Accessibility**.
 
 The app does **not**:
 - Log keystrokes
-- Send data to any server
+- Send data to any server — **all data stays on your Mac**
 - Access files or network
 - Run in the background when quit
 - Collect any analytics or telemetry
+
+**Conversion logging is disabled by default.** When you enable it, all data is stored locally in `~/Library/Application Support/LangSwitcher/`. Nothing is ever uploaded or shared.
 
 ## Contributing
 

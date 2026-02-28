@@ -93,20 +93,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Try clipboard-based approach first (works when text is selected)
         var capturedInput: String?
         var capturedOutput: String?
+        var capturedTargetLayout: String?
         let success = accessibilityService.getAndReplaceSelectedText { [weak self] (text: String) -> String? in
             NSLog("[LangSwitcher] getAndReplaceSelectedText got text: '\(text)' (len=\(text.count))")
             capturedInput = text
-            let result = self?.textConverter.convertSelectedText(text)
-            capturedOutput = result
-            NSLog("[LangSwitcher] convertSelectedText returned: \(result ?? "nil")")
-            return result
+            if let info = self?.textConverter.convertSelectedTextWithInfo(text) {
+                capturedOutput = info.text
+                capturedTargetLayout = info.targetLayoutID
+                NSLog("[LangSwitcher] convertSelectedText returned: \(info.text)")
+                return info.text
+            }
+            NSLog("[LangSwitcher] convertSelectedText returned: nil")
+            return nil
         }
         
         if success {
             NSLog("[LangSwitcher] Direct conversion succeeded")
             settingsManager.incrementConversionCount()
             logConversion(input: capturedInput, output: capturedOutput, mode: "direct")
+            switchLayoutIfNeeded(targetLayoutID: capturedTargetLayout, conversionOccurred: true)
             playFeedback()
+            showConversionNotification(input: capturedInput, output: capturedOutput)
         } else {
             NSLog("[LangSwitcher] No selected text, trying smart conversion after short delay...")
             usleep(50_000) // 50ms
@@ -136,15 +143,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func performLastWordConversion() {
         var capturedInput: String?
         var capturedOutput: String?
+        var capturedTargetLayout: String?
         let success = accessibilityService.selectAndReplaceLastWord { [weak self] (text: String) -> String? in
             guard let self = self else { return nil }
             NSLog("[LangSwitcher] lastWord got: '\(text)'")
             
             if self.textConverter.looksLikeWrongLayout(text) {
                 capturedInput = text
-                let result = self.textConverter.convertSelectedText(text)
-                capturedOutput = result
-                return result
+                if let info = self.textConverter.convertSelectedTextWithInfo(text) {
+                    capturedOutput = info.text
+                    capturedTargetLayout = info.targetLayoutID
+                    return info.text
+                }
             }
             return nil
         }
@@ -152,7 +162,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if success {
             settingsManager.incrementConversionCount()
             logConversion(input: capturedInput, output: capturedOutput, mode: "lastWord")
+            switchLayoutIfNeeded(targetLayoutID: capturedTargetLayout, conversionOccurred: true)
             playFeedback()
+            showConversionNotification(input: capturedInput, output: capturedOutput)
         }
     }
     
@@ -160,26 +172,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func performGreedyLineConversion() {
         var capturedInput: String?
         var capturedOutput: String?
+        var capturedTargetLayout: String?
         let success = accessibilityService.selectLineAndReplace { [weak self] (lineText: String) -> String? in
             guard let self = self else { return nil }
             NSLog("[LangSwitcher] greedyLine got line: '\(lineText)' (len=\(lineText.count))")
             
             capturedInput = lineText
-            let result = self.textConverter.convertLineGreedy(lineText)
-            capturedOutput = result
-            return result
+            // Use convertLineGreedyWithInfo to capture target layout
+            let result = self.textConverter.convertLineGreedyWithInfo(lineText)
+            capturedOutput = result?.text
+            capturedTargetLayout = result?.targetLayoutID
+            return result?.text
         }
         
         if success {
             settingsManager.incrementConversionCount()
             logConversion(input: capturedInput, output: capturedOutput, mode: "greedyLine")
+            switchLayoutIfNeeded(targetLayoutID: capturedTargetLayout, conversionOccurred: true)
             playFeedback()
+            showConversionNotification(input: capturedInput, output: capturedOutput)
         }
     }
     
     // MARK: - Conversion Logging
     
     private func logConversion(input: String?, output: String?, mode: String) {
+        guard settingsManager.loggingEnabled else { return }
         guard let input = input, let output = output else { return }
         
         let layouts = settingsManager.enabledLayouts
@@ -195,7 +213,56 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             targetLayout: targetLayout,
             conversionMode: mode
         )
+        
+        // Trim old entries if max is set
+        let maxEntries = settingsManager.logMaxEntries
+        if maxEntries > 0 {
+            conversionLogStore.trimToMaxEntries(maxEntries)
+        }
     }
+    
+    // MARK: - Layout Switch
+    
+    /// Switch system keyboard layout to the target after conversion, based on user's setting.
+    private func switchLayoutIfNeeded(targetLayoutID: String?, conversionOccurred: Bool) {
+        guard let targetLayoutID = targetLayoutID else { return }
+        
+        switch settingsManager.layoutSwitchMode {
+        case .always:
+            KeyboardLayoutDetector.switchToLayout(targetLayoutID)
+        case .ifLastWordConverted, .ifAnyWordConverted:
+            if conversionOccurred {
+                KeyboardLayoutDetector.switchToLayout(targetLayoutID)
+            }
+        }
+    }
+    
+    // MARK: - Notifications
+    
+    /// Show a macOS notification about the conversion result.
+    private func showConversionNotification(input: String?, output: String?) {
+        guard settingsManager.showNotifications else { return }
+        guard let input = input, let output = output else { return }
+        
+        let content = UNMutableNotificationContent()
+        content.title = "LangSwitcher"
+        content.body = "\(input) → \(output)"
+        content.sound = nil // Sound is handled separately by playSounds setting
+        
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                NSLog("[LangSwitcher] Failed to show notification: \(error)")
+            }
+        }
+    }
+    
+    // MARK: - Feedback
     
     private func playFeedback() {
         if settingsManager.playSounds {

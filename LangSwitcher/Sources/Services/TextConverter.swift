@@ -12,9 +12,20 @@ final class TextConverter {
         self.settingsManager = settingsManager
     }
     
+    /// Result of a conversion: converted text + target layout ID
+    struct ConversionResult {
+        let text: String
+        let targetLayoutID: String
+    }
+    
     /// Convert selected text from one layout to another
     /// Auto-detects source layout and converts to the "other" layout
     func convertSelectedText(_ text: String) -> String? {
+        return convertSelectedTextWithInfo(text)?.text
+    }
+    
+    /// Convert selected text and return both the result text and the target layout ID.
+    func convertSelectedTextWithInfo(_ text: String) -> ConversionResult? {
         let layouts = settingsManager.enabledLayouts
         NSLog("[LangSwitcher] convertSelectedText: enabledLayouts count=\(layouts.count), IDs=\(layouts.map(\.id))")
         guard layouts.count >= 2 else {
@@ -39,13 +50,19 @@ final class TextConverter {
         guard let targetLayout = layouts.first(where: { $0.id != detectedSourceID }) else {
             NSLog("[LangSwitcher] convertSelectedText: no target layout found different from source")
             guard let firstLayout = layouts.first else { return nil }
-            return LayoutMapper.convert(text: text, from: detectedSourceID, to: firstLayout.id)
+            if let result = LayoutMapper.convert(text: text, from: detectedSourceID, to: firstLayout.id) {
+                return ConversionResult(text: result, targetLayoutID: firstLayout.id)
+            }
+            return nil
         }
         
         NSLog("[LangSwitcher] convertSelectedText: converting from '\(detectedSourceID)' to '\(targetLayout.id)'")
         let result = LayoutMapper.convert(text: text, from: detectedSourceID, to: targetLayout.id)
         NSLog("[LangSwitcher] convertSelectedText: result = '\(result ?? "nil")'")
-        return result
+        if let result = result {
+            return ConversionResult(text: result, targetLayoutID: targetLayout.id)
+        }
+        return nil
     }
     
     /// Convert text explicitly between two specified layouts
@@ -216,18 +233,23 @@ final class TextConverter {
     /// Convert only the wrong-layout portion of a line.
     /// Returns the full replacement text (keep + converted) or nil if nothing to convert.
     func convertLineGreedy(_ text: String) -> String? {
+        return convertLineGreedyWithInfo(text)?.text
+    }
+    
+    /// Convert only the wrong-layout portion of a line, returning layout info.
+    func convertLineGreedyWithInfo(_ text: String) -> ConversionResult? {
         guard let boundary = findWrongLayoutBoundary(in: text) else {
             return nil
         }
         
-        guard let converted = convertSelectedText(boundary.convert) else {
+        guard let info = convertSelectedTextWithInfo(boundary.convert) else {
             NSLog("[LangSwitcher] convertLineGreedy: convertSelectedText failed for '\(boundary.convert)'")
             return nil
         }
         
-        let result = boundary.keep + converted
+        let result = boundary.keep + info.text
         NSLog("[LangSwitcher] convertLineGreedy: '\(text)' → '\(result)'")
-        return result
+        return ConversionResult(text: result, targetLayoutID: info.targetLayoutID)
     }
     
     // MARK: - Tokenization

@@ -76,6 +76,32 @@ final class KeyboardLayoutDetector {
         return KeyboardLayout(id: sourceID, localizedName: name, languageCode: langCode)
     }
     
+    /// Switch the active keyboard layout to the one matching the given source ID.
+    /// Uses TISSelectInputSource from the Carbon Input Source API.
+    static func switchToLayout(_ targetID: String) {
+        guard let inputSources = TISCreateInputSourceList(nil, false)?.takeRetainedValue() as? [TISInputSource] else {
+            NSLog("[LangSwitcher] switchToLayout: failed to get input source list")
+            return
+        }
+        
+        for source in inputSources {
+            guard let sourceIDPtr = TISGetInputSourceProperty(source, kTISPropertyInputSourceID) else { continue }
+            let sourceID = Unmanaged<CFString>.fromOpaque(sourceIDPtr).takeUnretainedValue() as String
+            
+            if sourceID == targetID {
+                let status = TISSelectInputSource(source)
+                if status == noErr {
+                    NSLog("[LangSwitcher] switchToLayout: switched to '\(targetID)'")
+                } else {
+                    NSLog("[LangSwitcher] switchToLayout: TISSelectInputSource failed with status \(status)")
+                }
+                return
+            }
+        }
+        
+        NSLog("[LangSwitcher] switchToLayout: layout '\(targetID)' not found in system sources")
+    }
+    
     /// Default fallback layouts
     private static func defaultLayouts() -> [KeyboardLayout] {
         [

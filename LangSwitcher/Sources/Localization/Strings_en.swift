@@ -107,6 +107,17 @@ enum Strings_en {
         "log.ratingCorrect":             "Correct — click to mark as incorrect",
         "log.ratingIncorrect":           "Incorrect — click to clear rating",
 
+        // ── Logging Settings (General Tab) ─────────────────────────
+        "general.logging":               "Conversion Logging",
+        "general.loggingEnabled":        "Enable Conversion Logging",
+        "general.loggingDisabledNote":   "Logging is disabled by default for your privacy. When enabled, conversions are stored locally on your Mac.",
+        "general.logMaxEntries":         "Maximum Log Entries",
+        "general.logUnlimited":          "0 = unlimited",
+
+        // ── Logging Disabled (Log Tab) ─────────────────────────────
+        "log.disabledTitle":             "Logging is Disabled",
+        "log.disabledHint":              "Enable conversion logging in the General tab to start recording conversions.",
+
         // ── About Window ────────────────────────────────────────────
         "about.windowTitle":             "About LangSwitcher",
         "about.appName":                 "LangSwitcher",

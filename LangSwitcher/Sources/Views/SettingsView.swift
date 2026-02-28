@@ -39,6 +39,7 @@ struct SettingsView: View {
                 .tag(3)
             
             ConversionLogView(logStore: ConversionLogStore.shared)
+                .environmentObject(settingsManager)
                 .environmentObject(l10n)
                 .tabItem {
                     Label(l10n.t("settings.tab.log"), systemImage: "list.bullet.rectangle")
@@ -96,6 +97,31 @@ struct GeneralSettingsTab: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 2)
+            }
+            
+            Section(l10n.t("general.logging")) {
+                Toggle(l10n.t("general.loggingEnabled"), isOn: $settingsManager.loggingEnabled)
+                
+                if settingsManager.loggingEnabled {
+                    Stepper(
+                        value: $settingsManager.logMaxEntries,
+                        in: 0...10000,
+                        step: 50
+                    ) {
+                        HStack {
+                            Text(l10n.t("general.logMaxEntries"))
+                            Spacer()
+                            Text(settingsManager.logMaxEntries == 0
+                                 ? l10n.t("general.logUnlimited")
+                                 : "\(settingsManager.logMaxEntries)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                
+                Text(l10n.t("general.loggingDisabledNote"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             
             Section(l10n.t("general.howItWorks")) {

@@ -226,6 +226,40 @@ final class ConversionLogStore: ObservableObject {
         }
     }
     
+    // MARK: - Trim to Max Entries
+    
+    /// Delete the oldest entries so that at most `max` entries remain.
+    /// If `max` is 0, no trimming is performed (unlimited).
+    func trimToMaxEntries(_ max: Int) {
+        guard max > 0, let db = db else { return }
+        
+        // Delete rows that are not among the newest `max` entries
+        let sql = """
+        DELETE FROM conversion_log WHERE id NOT IN (
+            SELECT id FROM conversion_log ORDER BY timestamp DESC LIMIT ?
+        );
+        """
+        
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
+            NSLog("[LangSwitcher] ConversionLogStore: failed to prepare TRIM")
+            return
+        }
+        defer { sqlite3_finalize(stmt) }
+        
+        sqlite3_bind_int(stmt, 1, Int32(max))
+        
+        if sqlite3_step(stmt) == SQLITE_DONE {
+            let deleted = sqlite3_changes(db)
+            if deleted > 0 {
+                NSLog("[LangSwitcher] ConversionLogStore: trimmed \(deleted) old entries (max: \(max))")
+                fetchAll() // Refresh published list
+            }
+        } else {
+            NSLog("[LangSwitcher] ConversionLogStore: TRIM failed")
+        }
+    }
+    
     // MARK: - Clear All
     
     func clearAll() {

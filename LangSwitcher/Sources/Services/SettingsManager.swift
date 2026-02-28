@@ -121,6 +121,16 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(conversionCount, forKey: Keys.conversionCount) }
     }
     
+    /// Whether conversion logging is enabled. Default: OFF (privacy first).
+    @Published var loggingEnabled: Bool {
+        didSet { defaults.set(loggingEnabled, forKey: Keys.loggingEnabled) }
+    }
+    
+    /// Max number of log entries to keep. 0 = unlimited. Default: 100.
+    @Published var logMaxEntries: Int {
+        didSet { defaults.set(logMaxEntries, forKey: Keys.logMaxEntries) }
+    }
+    
     // MARK: - Computed
     
     var hotkeyModifierFlags: NSEvent.ModifierFlags {
@@ -150,6 +160,8 @@ final class SettingsManager: ObservableObject {
         static let smartConversionMode = "smartConversionMode"
         static let layoutSwitchMode = "layoutSwitchMode"
         static let conversionCount = "conversionCount"
+        static let loggingEnabled = "loggingEnabled"
+        static let logMaxEntries = "logMaxEntries"
     }
     
     // MARK: - Init
@@ -176,6 +188,8 @@ final class SettingsManager: ObservableObject {
         self.layoutSwitchMode = LayoutSwitchMode(rawValue: savedLayoutSwitchMode ?? 0) ?? .always // Default: always
         
         self.conversionCount = defaults.integer(forKey: Keys.conversionCount)
+        self.loggingEnabled = defaults.object(forKey: Keys.loggingEnabled) as? Bool ?? false  // Default: OFF
+        self.logMaxEntries = defaults.object(forKey: Keys.logMaxEntries) as? Int ?? 100       // Default: 100
         
         // Load layouts
         if let data = defaults.data(forKey: Keys.enabledLayouts),

@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ConversionLogView: View {
     @ObservedObject var logStore: ConversionLogStore
+    @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var l10n: LocalizationManager
     @State private var showClearConfirmation = false
     
@@ -16,6 +17,24 @@ struct ConversionLogView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Show disabled state when logging is off
+            if !settingsManager.loggingEnabled {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "eye.slash")
+                        .font(.system(size: 36))
+                        .foregroundStyle(.tertiary)
+                    Text(l10n.t("log.disabledTitle"))
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Text(l10n.t("log.disabledHint"))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+            } else {
             // Header
             HStack {
                 Text(l10n.t("log.title"))
@@ -69,6 +88,7 @@ struct ConversionLogView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
+            } // end else (logging enabled)
         }
         .padding()
         .alert(l10n.t("log.clearConfirmTitle"), isPresented: $showClearConfirmation) {
