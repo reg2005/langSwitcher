@@ -92,15 +92,17 @@ enum LayoutCharacterMap {
     }()
     
     // Map of layout identifier patterns to their character maps
+    // IMPORTANT: Order matters! More specific patterns must come BEFORE less specific ones.
+    // e.g., "russian" must come before "us" because "russian" contains "us" as substring.
     static let allMaps: [(pattern: String, map: [Character: Character])] = [
-        ("us", qwertyUS),
-        ("abc", qwertyUS),        // ABC keyboard is same as US
-        ("british", qwertyUS),    // Close enough for conversion
         ("russian", russian),
+        ("ukrainian", ukrainian),
         ("german", german),
         ("french", french),
-        ("ukrainian", ukrainian),
         ("spanish", spanish),
+        ("british", qwertyUS),    // Close enough for conversion
+        ("abc", qwertyUS),        // ABC keyboard is same as US
+        ("us", qwertyUS),         // Must be LAST among Latin layouts — "us" is substring of "russian" etc.
     ]
     
     /// Get character map for a given layout identifier
@@ -108,9 +110,11 @@ enum LayoutCharacterMap {
         let lowered = layoutID.lowercased()
         for (pattern, map) in allMaps {
             if lowered.contains(pattern) {
+                NSLog("[LangSwitcher] characterMap: '\(layoutID)' matched pattern '\(pattern)'")
                 return map
             }
         }
+        NSLog("[LangSwitcher] characterMap: no match for '\(layoutID)'")
         return nil
     }
 }

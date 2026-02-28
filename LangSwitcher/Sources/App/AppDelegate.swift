@@ -67,20 +67,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     func performConversion() {
         guard AccessibilityService.hasAccessibilityPermission else {
+            NSLog("[LangSwitcher] No accessibility permission")
             showAccessibilityAlert()
             return
         }
         
+        NSLog("[LangSwitcher] performConversion() called")
+        
         // Try clipboard-based approach first (works when text is selected)
         let success = accessibilityService.getAndReplaceSelectedText { [weak self] (text: String) -> String? in
-            return self?.textConverter.convertSelectedText(text)
+            NSLog("[LangSwitcher] getAndReplaceSelectedText got text: '\(text)' (len=\(text.count))")
+            let result = self?.textConverter.convertSelectedText(text)
+            NSLog("[LangSwitcher] convertSelectedText returned: \(result ?? "nil")")
+            return result
         }
         
         if success {
+            NSLog("[LangSwitcher] Direct conversion succeeded")
             settingsManager.incrementConversionCount()
             playFeedback()
         } else {
-            // No text selected — try to find last typed gibberish and convert it
+            NSLog("[LangSwitcher] No selected text, trying smart conversion after short delay...")
+            // Small delay to let the first ⌘C fully settle before attempting smart conversion
+            usleep(50_000) // 50ms
             performSmartConversion()
         }
     }
@@ -88,16 +97,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// When no text is selected, simulate selecting the last word/chunk,
     /// check if it looks like wrong-layout text, and convert it
     private func performSmartConversion() {
+        NSLog("[LangSwitcher] performSmartConversion() called")
         // Strategy: select last typed word via Option+Shift+Left, then convert
         let success = accessibilityService.selectAndReplaceLastWord { [weak self] (text: String) -> String? in
             guard let self = self else { return nil }
-            // Only convert if text looks like gibberish (wrong layout)
-            if self.textConverter.looksLikeWrongLayout(text) {
-                return self.textConverter.convertSelectedText(text)
+            NSLog("[LangSwitcher] selectAndReplaceLastWord got text: '\(text)' (len=\(text.count))")
+            
+            let looksWrong = self.textConverter.looksLikeWrongLayout(text)
+            NSLog("[LangSwitcher] looksLikeWrongLayout('\(text)') = \(looksWrong)")
+            
+            if looksWrong {
+                let result = self.textConverter.convertSelectedText(text)
+                NSLog("[LangSwitcher] convertSelectedText returned: \(result ?? "nil")")
+                return result
             }
             return nil
         }
         
+        NSLog("[LangSwitcher] performSmartConversion result: \(success)")
         if success {
             settingsManager.incrementConversionCount()
             playFeedback()

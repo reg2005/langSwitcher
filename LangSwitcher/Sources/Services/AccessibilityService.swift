@@ -29,25 +29,31 @@ final class AccessibilityService {
         // Copy selected text (⌘C)
         pasteboard.clearContents()
         simulateCopy()
-        usleep(100_000) // 100ms
+        usleep(150_000) // 150ms — give target app time to process ⌘C
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
+            NSLog("[LangSwitcher] getAndReplaceSelectedText: no text on clipboard after ⌘C")
             restorePasteboard(savedContents)
             return false
         }
         
+        NSLog("[LangSwitcher] getAndReplaceSelectedText: copied text = '\(selectedText)'")
+        
         guard let convertedText = converter(selectedText) else {
+            NSLog("[LangSwitcher] getAndReplaceSelectedText: converter returned nil")
             restorePasteboard(savedContents)
             return false
         }
+        
+        NSLog("[LangSwitcher] getAndReplaceSelectedText: pasting converted text = '\(convertedText)'")
         
         // Paste converted text
         pasteboard.clearContents()
         pasteboard.setString(convertedText, forType: .string)
         simulatePaste()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.restorePasteboard(savedContents)
         }
         
@@ -63,34 +69,42 @@ final class AccessibilityService {
         let pasteboard = NSPasteboard.general
         let savedContents = savePasteboard()
         
+        NSLog("[LangSwitcher] selectAndReplaceLastWord: selecting word left...")
+        
         // First, try selecting last word: Shift+Option+Left arrow selects one word left
         simulateSelectWordLeft()
-        usleep(80_000) // 80ms
+        usleep(150_000) // 150ms — give target app time to process selection
         
         // Copy the selection
         pasteboard.clearContents()
         simulateCopy()
-        usleep(100_000) // 100ms
+        usleep(150_000) // 150ms — give target app time to process ⌘C
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
+            NSLog("[LangSwitcher] selectAndReplaceLastWord: no text copied after selection+copy")
             restorePasteboard(savedContents)
             return false
         }
         
+        NSLog("[LangSwitcher] selectAndReplaceLastWord: copied word = '\(selectedText)'")
+        
         guard let convertedText = converter(selectedText) else {
+            NSLog("[LangSwitcher] selectAndReplaceLastWord: converter returned nil, deselecting")
             // No conversion needed — deselect by pressing Right arrow
             simulateRightArrow()
             restorePasteboard(savedContents)
             return false
         }
         
+        NSLog("[LangSwitcher] selectAndReplaceLastWord: pasting converted = '\(convertedText)'")
+        
         // Paste converted text (replaces the selection)
         pasteboard.clearContents()
         pasteboard.setString(convertedText, forType: .string)
         simulatePaste()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.restorePasteboard(savedContents)
         }
         

@@ -16,7 +16,11 @@ final class TextConverter {
     /// Auto-detects source layout and converts to the "other" layout
     func convertSelectedText(_ text: String) -> String? {
         let layouts = settingsManager.enabledLayouts
-        guard layouts.count >= 2 else { return nil }
+        NSLog("[LangSwitcher] convertSelectedText: enabledLayouts count=\(layouts.count), IDs=\(layouts.map(\.id))")
+        guard layouts.count >= 2 else {
+            NSLog("[LangSwitcher] convertSelectedText: fewer than 2 layouts, returning nil")
+            return nil
+        }
         
         let layoutIDs = layouts.map(\.id)
         
@@ -24,15 +28,24 @@ final class TextConverter {
         guard let detectedSourceID = LayoutMapper.detectSourceLayout(
             text: text,
             candidateLayouts: layoutIDs
-        ) else { return nil }
+        ) else {
+            NSLog("[LangSwitcher] convertSelectedText: detectSourceLayout returned nil")
+            return nil
+        }
+        
+        NSLog("[LangSwitcher] convertSelectedText: detected source layout = '\(detectedSourceID)'")
         
         // Find the target layout (the "other" one)
         guard let targetLayout = layouts.first(where: { $0.id != detectedSourceID }) else {
+            NSLog("[LangSwitcher] convertSelectedText: no target layout found different from source")
             guard let firstLayout = layouts.first else { return nil }
             return LayoutMapper.convert(text: text, from: detectedSourceID, to: firstLayout.id)
         }
         
-        return LayoutMapper.convert(text: text, from: detectedSourceID, to: targetLayout.id)
+        NSLog("[LangSwitcher] convertSelectedText: converting from '\(detectedSourceID)' to '\(targetLayout.id)'")
+        let result = LayoutMapper.convert(text: text, from: detectedSourceID, to: targetLayout.id)
+        NSLog("[LangSwitcher] convertSelectedText: result = '\(result ?? "nil")'")
+        return result
     }
     
     /// Convert text explicitly between two specified layouts
@@ -45,10 +58,16 @@ final class TextConverter {
     /// We check: if converting the text to another layout produces something more "readable".
     func looksLikeWrongLayout(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return false }
+        guard !trimmed.isEmpty else {
+            NSLog("[LangSwitcher] looksLikeWrongLayout: empty text")
+            return false
+        }
         
         let layouts = settingsManager.enabledLayouts
-        guard layouts.count >= 2 else { return false }
+        guard layouts.count >= 2 else {
+            NSLog("[LangSwitcher] looksLikeWrongLayout: fewer than 2 layouts")
+            return false
+        }
         
         let layoutIDs = layouts.map(\.id)
         
@@ -56,19 +75,25 @@ final class TextConverter {
         guard let detectedSourceID = LayoutMapper.detectSourceLayout(
             text: trimmed,
             candidateLayouts: layoutIDs
-        ) else { return false }
+        ) else {
+            NSLog("[LangSwitcher] looksLikeWrongLayout: detectSourceLayout returned nil")
+            return false
+        }
+        
+        NSLog("[LangSwitcher] looksLikeWrongLayout: detected source='\(detectedSourceID)' for '\(trimmed)'")
         
         // Try converting to each other layout and see if it "makes more sense"
         for layout in layouts where layout.id != detectedSourceID {
             if let converted = LayoutMapper.convert(text: trimmed, from: detectedSourceID, to: layout.id) {
-                // Heuristic: if the source text contains mostly ASCII letters that map to
-                // a non-Latin alphabet (or vice versa), it's likely wrong layout.
-                // Check if the character sets differ significantly.
+                NSLog("[LangSwitcher] looksLikeWrongLayout: converted to '\(converted)' via layout '\(layout.id)'")
+                
                 let sourceHasLatinOnly = trimmed.allSatisfy { $0.isASCII || !$0.isLetter }
                 let convertedHasNonLatin = converted.contains { !$0.isASCII && $0.isLetter }
                 
                 let sourceHasNonLatin = trimmed.contains { !$0.isASCII && $0.isLetter }
                 let convertedHasLatinOnly = converted.allSatisfy { $0.isASCII || !$0.isLetter }
+                
+                NSLog("[LangSwitcher] looksLikeWrongLayout: srcLatinOnly=\(sourceHasLatinOnly) convNonLatin=\(convertedHasNonLatin) srcNonLatin=\(sourceHasNonLatin) convLatinOnly=\(convertedHasLatinOnly)")
                 
                 // Case 1: "ghbdtn" (all ASCII) -> "привет" (non-ASCII) = wrong layout
                 if sourceHasLatinOnly && convertedHasNonLatin {
@@ -82,6 +107,7 @@ final class TextConverter {
             }
         }
         
+        NSLog("[LangSwitcher] looksLikeWrongLayout: no wrong layout detected")
         return false
     }
 }
