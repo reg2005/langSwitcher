@@ -15,9 +15,52 @@ struct ConversionLogView: View {
         return f
     }()
     
+    /// Binding that maps logMaxEntries==0 to "unlimited" toggle
+    private var isUnlimited: Binding<Bool> {
+        Binding(
+            get: { settingsManager.logMaxEntries == 0 },
+            set: { newValue in
+                settingsManager.logMaxEntries = newValue ? 0 : 100
+            }
+        )
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Show disabled state when logging is off
+            // ── Log Settings ────────────────────────────────────────
+            HStack {
+                Toggle(l10n.t("general.loggingEnabled"), isOn: $settingsManager.loggingEnabled)
+                
+                Spacer()
+                
+                if settingsManager.loggingEnabled {
+                    Toggle(l10n.t("log.unlimited"), isOn: isUnlimited)
+                        .toggleStyle(.switch)
+                        .fixedSize()
+                    
+                    if !isUnlimited.wrappedValue {
+                        Stepper(
+                            value: $settingsManager.logMaxEntries,
+                            in: 1...100000,
+                            step: 50
+                        ) {
+                            Text("\(settingsManager.logMaxEntries)")
+                                .monospacedDigit()
+                                .frame(width: 50, alignment: .trailing)
+                        }
+                        .fixedSize()
+                    }
+                }
+            }
+            
+            Text(l10n.t("general.loggingDisabledNote"))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            
+            Divider()
+                .padding(.vertical, 2)
+            
+            // ── Log Content ─────────────────────────────────────────
             if !settingsManager.loggingEnabled {
                 VStack(spacing: 12) {
                     Spacer()
@@ -35,60 +78,60 @@ struct ConversionLogView: View {
                 }
                 .frame(maxWidth: .infinity)
             } else {
-            // Header
-            HStack {
-                Text(l10n.t("log.title"))
-                    .font(.headline)
+                // Header
+                HStack {
+                    Text(l10n.t("log.title"))
+                        .font(.headline)
+                    
+                    Spacer()
+                    
+                    Text(l10n.t("log.entries").replacingOccurrences(of: "%d", with: "\(logStore.logs.count)"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Button(l10n.t("log.exportJSON")) {
+                        exportJSON()
+                    }
+                    .font(.caption)
+                    
+                    Button(l10n.t("log.clearAll")) {
+                        showClearConfirmation = true
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                }
                 
-                Spacer()
-                
-                Text(l10n.t("log.entries").replacingOccurrences(of: "%d", with: "\(logStore.logs.count)"))
+                Text(l10n.t("log.ratingHint"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                Button(l10n.t("log.exportJSON")) {
-                    exportJSON()
-                }
-                .font(.caption)
-                
-                Button(l10n.t("log.clearAll")) {
-                    showClearConfirmation = true
-                }
-                .font(.caption)
-                .foregroundStyle(.red)
-            }
-            
-            Text(l10n.t("log.ratingHint"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            
-            // Log list
-            if logStore.logs.isEmpty {
-                VStack {
-                    Spacer()
-                    Text(l10n.t("log.emptyTitle"))
-                        .foregroundStyle(.tertiary)
-                        .frame(maxWidth: .infinity)
-                    Text(l10n.t("log.emptyHint"))
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                    Spacer()
-                }
-            } else {
-                List {
-                    ForEach(logStore.logs) { entry in
-                        ConversionLogRow(
-                            entry: entry,
-                            dateFormatter: dateFormatter,
-                            onToggleRating: { toggleRating(entry: entry) },
-                            onDelete: { logStore.delete(id: entry.id) }
-                        )
-                        .environmentObject(l10n)
+                // Log list
+                if logStore.logs.isEmpty {
+                    VStack {
+                        Spacer()
+                        Text(l10n.t("log.emptyTitle"))
+                            .foregroundStyle(.tertiary)
+                            .frame(maxWidth: .infinity)
+                        Text(l10n.t("log.emptyHint"))
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                        Spacer()
                     }
+                } else {
+                    List {
+                        ForEach(logStore.logs) { entry in
+                            ConversionLogRow(
+                                entry: entry,
+                                dateFormatter: dateFormatter,
+                                onToggleRating: { toggleRating(entry: entry) },
+                                onDelete: { logStore.delete(id: entry.id) }
+                            )
+                            .environmentObject(l10n)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-            } // end else (logging enabled)
         }
         .padding()
         .alert(l10n.t("log.clearConfirmTitle"), isPresented: $showClearConfirmation) {

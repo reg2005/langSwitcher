@@ -115,8 +115,9 @@ enum Strings_en {
         "general.logUnlimited":          "0 = unlimited",
 
         // ── Logging Disabled (Log Tab) ─────────────────────────────
+        "log.unlimited":                 "Unlimited",
         "log.disabledTitle":             "Logging is Disabled",
-        "log.disabledHint":              "Enable conversion logging in the General tab to start recording conversions.",
+        "log.disabledHint":              "Enable logging above to start recording conversions.",
 
         // ── About Window ────────────────────────────────────────────
         "about.windowTitle":             "About LangSwitcher",

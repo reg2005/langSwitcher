@@ -124,31 +124,6 @@ struct GeneralSettingsTab: View {
                     .padding(.top, 2)
             }
             
-            Section(l10n.t("general.logging")) {
-                Toggle(l10n.t("general.loggingEnabled"), isOn: $settingsManager.loggingEnabled)
-                
-                if settingsManager.loggingEnabled {
-                    Stepper(
-                        value: $settingsManager.logMaxEntries,
-                        in: 0...10000,
-                        step: 50
-                    ) {
-                        HStack {
-                            Text(l10n.t("general.logMaxEntries"))
-                            Spacer()
-                            Text(settingsManager.logMaxEntries == 0
-                                 ? l10n.t("general.logUnlimited")
-                                 : "\(settingsManager.logMaxEntries)")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                
-                Text(l10n.t("general.loggingDisabledNote"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
             Section(l10n.t("general.howItWorks")) {
                 Text(l10n.t("general.howItWorksText"))
                     .font(.caption)
