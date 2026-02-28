@@ -19,6 +19,16 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
+    - name: Run Tests
+      run: |
+        xcodebuild test \
+          -project LangSwitcher.xcodeproj \
+          -scheme LangSwitcher \
+          -destination 'platform=macOS' \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
     - name: Build
       run: |
         xcodebuild -project LangSwitcher.xcodeproj \

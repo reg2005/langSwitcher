@@ -33,7 +33,7 @@ struct SettingsView: View {
                 }
                 .tag(3)
         }
-        .frame(width: 520, height: 400)
+        .frame(width: 520, height: 480)
         .padding()
     }
 }
@@ -60,6 +60,20 @@ struct GeneralSettingsTab: View {
                 .pickerStyle(.radioGroup)
                 
                 Text(settingsManager.smartConversionMode.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+            }
+            
+            Section("Layout Switch after Conversion") {
+                Picker("Mode:", selection: $settingsManager.layoutSwitchMode) {
+                    ForEach(LayoutSwitchMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                
+                Text(settingsManager.layoutSwitchMode.description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 2)

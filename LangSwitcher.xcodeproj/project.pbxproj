@@ -22,7 +22,19 @@
 		E10000010000000000000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E10000020000000000000013 /* Assets.xcassets */; };
 		E10000010000000000000014 /* HotkeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000020000000000000014 /* HotkeyRecorderView.swift */; };
 		E10000010000000000000015 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000020000000000000015 /* PermissionsView.swift */; };
+		E10000010000000000000101 /* LayoutMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000020000000000000101 /* LayoutMapperTests.swift */; };
+		E10000010000000000000102 /* TextConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000020000000000000102 /* TextConverterTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E1000000A000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000070000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000060000000000000001;
+			remoteInfo = LangSwitcher;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		E10000020000000000000001 /* LangSwitcherApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangSwitcherApp.swift; sourceTree = "<group>"; };
@@ -40,13 +52,23 @@
 		E10000020000000000000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E10000020000000000000014 /* HotkeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyRecorderView.swift; sourceTree = "<group>"; };
 		E10000020000000000000015 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
+		E10000020000000000000101 /* LayoutMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutMapperTests.swift; sourceTree = "<group>"; };
+		E10000020000000000000102 /* TextConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextConverterTests.swift; sourceTree = "<group>"; };
 		E10000030000000000000001 /* LangSwitcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LangSwitcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E10000030000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E10000030000000000000003 /* LangSwitcher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LangSwitcher.entitlements; sourceTree = "<group>"; };
+		E10000030000000000000101 /* LangSwitcherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LangSwitcherTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E10000040000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E10000040000000000000101 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -60,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				E10000050000000000000002 /* LangSwitcher */,
+				E10000050000000000000101 /* LangSwitcherTests */,
 				E10000050000000000000010 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -140,8 +163,18 @@
 			isa = PBXGroup;
 			children = (
 				E10000030000000000000001 /* LangSwitcher.app */,
+				E10000030000000000000101 /* LangSwitcherTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E10000050000000000000101 /* LangSwitcherTests */ = {
+			isa = PBXGroup;
+			children = (
+				E10000020000000000000101 /* LayoutMapperTests.swift */,
+				E10000020000000000000102 /* TextConverterTests.swift */,
+			);
+			path = LangSwitcherTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -164,6 +197,24 @@
 			productReference = E10000030000000000000001 /* LangSwitcher.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E10000060000000000000101 /* LangSwitcherTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10000080000000000000101 /* Build configuration list for PBXNativeTarget "LangSwitcherTests" */;
+			buildPhases = (
+				E10000060000000000000102 /* Sources */,
+				E10000040000000000000101 /* Frameworks */,
+				E10000060000000000000103 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1000000B000000000000001 /* PBXTargetDependency */,
+			);
+			name = LangSwitcherTests;
+			productName = LangSwitcherTests;
+			productReference = E10000030000000000000101 /* LangSwitcherTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -176,6 +227,10 @@
 				TargetAttributes = {
 					E10000060000000000000001 = {
 						CreatedOnToolsVersion = 15.4;
+					};
+					E10000060000000000000101 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = E10000060000000000000001;
 					};
 				};
 			};
@@ -193,6 +248,7 @@
 			projectRoot = "";
 			targets = (
 				E10000060000000000000001 /* LangSwitcher */,
+				E10000060000000000000101 /* LangSwitcherTests */,
 			);
 		};
 /* End PBXProject section */
@@ -203,6 +259,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E10000010000000000000013 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E10000060000000000000103 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,7 +293,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E10000060000000000000102 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E10000010000000000000101 /* LayoutMapperTests.swift in Sources */,
+				E10000010000000000000102 /* TextConverterTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E1000000B000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000060000000000000001 /* LangSwitcher */;
+			targetProxy = E1000000A000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E10000090000000000000001 /* Debug */ = {
@@ -405,6 +485,40 @@
 			};
 			name = Release;
 		};
+		E10000090000000000000101 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.langswitcher.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LangSwitcher.app/Contents/MacOS/LangSwitcher";
+			};
+			name = Debug;
+		};
+		E10000090000000000000102 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.langswitcher.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LangSwitcher.app/Contents/MacOS/LangSwitcher";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -422,6 +536,15 @@
 			buildConfigurations = (
 				E10000090000000000000001 /* Debug */,
 				E10000090000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E10000080000000000000101 /* Build configuration list for PBXNativeTarget "LangSwitcherTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E10000090000000000000101 /* Debug */,
+				E10000090000000000000102 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

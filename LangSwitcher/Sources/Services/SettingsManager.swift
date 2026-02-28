@@ -29,6 +29,34 @@ enum SmartConversionMode: Int, CaseIterable, Codable {
     }
 }
 
+// MARK: - Layout Switch Mode
+/// Controls whether the keyboard layout is automatically switched after a hotkey-triggered conversion
+
+enum LayoutSwitchMode: Int, CaseIterable, Codable {
+    case always = 0           // Always switch layout when hotkey is pressed
+    case ifLastWordConverted = 1  // Switch if the last word was in wrong layout and got reconverted
+    case ifAnyWordConverted = 2   // Switch if any word in the converted text needed reconversion
+    
+    var displayName: String {
+        switch self {
+        case .always: return "Always switch layout"
+        case .ifLastWordConverted: return "Switch if last word was converted"
+        case .ifAnyWordConverted: return "Switch if any word required conversion"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .always:
+            return "Always switch the keyboard layout after pressing the hotkey, regardless of whether text was converted."
+        case .ifLastWordConverted:
+            return "Switch the layout only if the last word before the cursor was typed in the wrong layout and got reconverted."
+        case .ifAnyWordConverted:
+            return "Switch the layout if any word in the converted text needed reconversion to the correct layout."
+        }
+    }
+}
+
 // MARK: - Settings Manager
 // Persists user preferences via UserDefaults
 
@@ -87,6 +115,10 @@ final class SettingsManager: ObservableObject {
         didSet { defaults.set(smartConversionMode.rawValue, forKey: Keys.smartConversionMode) }
     }
     
+    @Published var layoutSwitchMode: LayoutSwitchMode {
+        didSet { defaults.set(layoutSwitchMode.rawValue, forKey: Keys.layoutSwitchMode) }
+    }
+    
     @Published var conversionCount: Int {
         didSet { defaults.set(conversionCount, forKey: Keys.conversionCount) }
     }
@@ -118,6 +150,7 @@ final class SettingsManager: ObservableObject {
         static let showNotifications = "showNotifications"
         static let playSounds = "playSounds"
         static let smartConversionMode = "smartConversionMode"
+        static let layoutSwitchMode = "layoutSwitchMode"
         static let conversionCount = "conversionCount"
     }
     
@@ -140,6 +173,9 @@ final class SettingsManager: ObservableObject {
         self.playSounds = defaults.object(forKey: Keys.playSounds) as? Bool ?? true
         let savedSmartMode = defaults.object(forKey: Keys.smartConversionMode) as? Int
         self.smartConversionMode = SmartConversionMode(rawValue: savedSmartMode ?? 1) ?? .greedyLine // Default: greedy
+        
+        let savedLayoutSwitchMode = defaults.object(forKey: Keys.layoutSwitchMode) as? Int
+        self.layoutSwitchMode = LayoutSwitchMode(rawValue: savedLayoutSwitchMode ?? 0) ?? .always // Default: always
         
         self.conversionCount = defaults.integer(forKey: Keys.conversionCount)
         
