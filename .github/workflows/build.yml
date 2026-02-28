@@ -1,0 +1,103 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build LayoutSwitcher
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+    - name: Build
+      run: |
+        xcodebuild -project LayoutSwitcher.xcodeproj \
+          -scheme LayoutSwitcher \
+          -configuration Release \
+          -derivedDataPath build \
+          -arch arm64 -arch x86_64 \
+          ONLY_ACTIVE_ARCH=NO \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          build
+
+    - name: Create DMG
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        APP_PATH="build/Build/Products/Release/LayoutSwitcher.app"
+        DMG_NAME="LayoutSwitcher-$(echo ${{ github.ref_name }} | sed 's/^v//').dmg"
+        
+        # Create a temporary folder for the DMG contents
+        mkdir -p dmg_contents
+        cp -R "$APP_PATH" dmg_contents/
+        
+        # Create a symlink to /Applications
+        ln -s /Applications dmg_contents/Applications
+        
+        # Create the DMG
+        hdiutil create -volname "LayoutSwitcher" \
+          -srcfolder dmg_contents \
+          -ov -format UDZO \
+          "$DMG_NAME"
+        
+        echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LayoutSwitcher
+        path: build/Build/Products/Release/LayoutSwitcher.app
+        if-no-files-found: error
+
+    - name: Upload DMG Artifact
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v4
+      with:
+        name: LayoutSwitcher-DMG
+        path: "*.dmg"
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download DMG
+      uses: actions/download-artifact@v4
+      with:
+        name: LayoutSwitcher-DMG
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: "LayoutSwitcher ${{ github.ref_name }}"
+        body: |
+          ## LayoutSwitcher ${{ github.ref_name }}
+          
+          ### Installation
+          1. Download the `.dmg` file below
+          2. Open the DMG and drag LayoutSwitcher to Applications
+          3. Launch LayoutSwitcher from Applications
+          4. Grant Accessibility permission when prompted
+          5. Press **⇧⇧** (double Shift) to convert selected text
+          
+          ### Requirements
+          - macOS 13.0 (Ventura) or later
+          - Apple Silicon or Intel Mac
+        draft: false
+        prerelease: false
+        files: "*.dmg"
