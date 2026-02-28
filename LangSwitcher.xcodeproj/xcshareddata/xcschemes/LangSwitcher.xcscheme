@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E10000060000000000000001"
-               BuildableName = "LayoutSwitcher.app"
-               BlueprintName = "LayoutSwitcher"
-               ReferencedContainer = "container:LayoutSwitcher.xcodeproj">
+               BuildableName = "LangSwitcher.app"
+               BlueprintName = "LangSwitcher"
+               ReferencedContainer = "container:LangSwitcher.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,9 +44,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E10000060000000000000001"
-            BuildableName = "LayoutSwitcher.app"
-            BlueprintName = "LayoutSwitcher"
-            ReferencedContainer = "container:LayoutSwitcher.xcodeproj">
+            BuildableName = "LangSwitcher.app"
+            BlueprintName = "LangSwitcher"
+            ReferencedContainer = "container:LangSwitcher.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E10000060000000000000001"
-            BuildableName = "LayoutSwitcher.app"
-            BlueprintName = "LayoutSwitcher"
-            ReferencedContainer = "container:LayoutSwitcher.xcodeproj">
+            BuildableName = "LangSwitcher.app"
+            BlueprintName = "LangSwitcher"
+            ReferencedContainer = "container:LangSwitcher.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

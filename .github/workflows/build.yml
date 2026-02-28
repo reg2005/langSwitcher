@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build LayoutSwitcher
+    name: Build LangSwitcher
     runs-on: macos-14
     
     steps:
@@ -21,8 +21,8 @@ jobs:
 
     - name: Build
       run: |
-        xcodebuild -project LayoutSwitcher.xcodeproj \
-          -scheme LayoutSwitcher \
+        xcodebuild -project LangSwitcher.xcodeproj \
+          -scheme LangSwitcher \
           -configuration Release \
           -derivedDataPath build \
           -arch arm64 -arch x86_64 \
@@ -35,8 +35,8 @@ jobs:
     - name: Create DMG
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
-        APP_PATH="build/Build/Products/Release/LayoutSwitcher.app"
-        DMG_NAME="LayoutSwitcher-$(echo ${{ github.ref_name }} | sed 's/^v//').dmg"
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        DMG_NAME="LangSwitcher-$(echo ${{ github.ref_name }} | sed 's/^v//').dmg"
         
         # Create a temporary folder for the DMG contents
         mkdir -p dmg_contents
@@ -46,7 +46,7 @@ jobs:
         ln -s /Applications dmg_contents/Applications
         
         # Create the DMG
-        hdiutil create -volname "LayoutSwitcher" \
+        hdiutil create -volname "LangSwitcher" \
           -srcfolder dmg_contents \
           -ov -format UDZO \
           "$DMG_NAME"
@@ -56,15 +56,15 @@ jobs:
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: LayoutSwitcher
-        path: build/Build/Products/Release/LayoutSwitcher.app
+        name: LangSwitcher
+        path: build/Build/Products/Release/LangSwitcher.app
         if-no-files-found: error
 
     - name: Upload DMG Artifact
       if: startsWith(github.ref, 'refs/tags/v')
       uses: actions/upload-artifact@v4
       with:
-        name: LayoutSwitcher-DMG
+        name: LangSwitcher-DMG
         path: "*.dmg"
 
   release:
@@ -79,19 +79,19 @@ jobs:
     - name: Download DMG
       uses: actions/download-artifact@v4
       with:
-        name: LayoutSwitcher-DMG
+        name: LangSwitcher-DMG
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        name: "LayoutSwitcher ${{ github.ref_name }}"
+        name: "LangSwitcher ${{ github.ref_name }}"
         body: |
-          ## LayoutSwitcher ${{ github.ref_name }}
+          ## LangSwitcher ${{ github.ref_name }}
           
           ### Installation
           1. Download the `.dmg` file below
-          2. Open the DMG and drag LayoutSwitcher to Applications
-          3. Launch LayoutSwitcher from Applications
+          2. Open the DMG and drag LangSwitcher to Applications
+          3. Launch LangSwitcher from Applications
           4. Grant Accessibility permission when prompted
           5. Press **⇧⇧** (double Shift) to convert selected text
           

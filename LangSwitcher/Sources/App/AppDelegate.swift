@@ -67,7 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     func performConversion() {
         guard AccessibilityService.hasAccessibilityPermission else {
-            AccessibilityService.requestAccessibilityPermission()
+            showAccessibilityAlert()
             return
         }
         
@@ -107,6 +107,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func playFeedback() {
         if settingsManager.playSounds {
             NSSound(named: .init("Tink"))?.play()
+        }
+    }
+    
+    private func showAccessibilityAlert() {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = "Accessibility Access Required"
+        alert.informativeText = "LangSwitcher needs Accessibility permission to read and replace text.\n\nGo to System Settings → Privacy & Security → Accessibility and enable LangSwitcher.\n\nIf you already granted permission, try removing and re-adding the app in the list."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Open System Settings")
+        alert.addButton(withTitle: "Cancel")
+        
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                NSWorkspace.shared.open(url)
+            }
         }
     }
 }

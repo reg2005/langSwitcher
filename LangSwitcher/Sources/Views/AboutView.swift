@@ -7,7 +7,7 @@ struct AboutView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(.blue)
             
-            Text("LayoutSwitcher")
+            Text("LangSwitcher")
                 .font(.title)
                 .bold()
             
@@ -28,7 +28,7 @@ struct AboutView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Label("Select text typed in wrong layout", systemImage: "1.circle")
-                    Label("Press your hotkey (default: ⌥S)", systemImage: "2.circle")
+                    Label("Press ⇧⇧ (double Shift)", systemImage: "2.circle")
                     Label("Text is automatically converted!", systemImage: "3.circle")
                 }
                 .font(.caption)
@@ -37,7 +37,7 @@ struct AboutView: View {
             Divider()
             
             HStack {
-                Link("GitHub", destination: URL(string: "https://github.com/nicklama/LayoutSwitcher")!)
+                Link("GitHub", destination: URL(string: "https://github.com/reg2005/langSwitcher")!)
                     .font(.caption)
                 
                 Text("•")

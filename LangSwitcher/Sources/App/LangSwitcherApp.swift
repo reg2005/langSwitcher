@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct LayoutSwitcherApp: App {
+struct LangSwitcherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {

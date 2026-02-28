@@ -1,8 +1,8 @@
-# LayoutSwitcher
+# LangSwitcher
 
 **Open-source keyboard layout text converter for macOS.**
 
-Typed text in the wrong keyboard layout? Select it, press a hotkey, and LayoutSwitcher instantly converts it to the correct layout. No more retyping `ghbdtn` when you meant `привет`.
+Typed text in the wrong keyboard layout? Select it, press a hotkey, and LangSwitcher instantly converts it to the correct layout. No more retyping `ghbdtn` when you meant `привет`.
 
 [![Build](https://github.com/reg2005/langSwitcher/actions/workflows/build.yml/badge.svg)](https://github.com/reg2005/langSwitcher/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -29,16 +29,16 @@ Typed text in the wrong keyboard layout? Select it, press a hotkey, and LayoutSw
 4. Text is replaced with "привет"
 ```
 
-LayoutSwitcher maps characters based on **physical key positions** on the keyboard. The same physical key produces different characters depending on the active layout — LayoutSwitcher reverses this mapping.
+LangSwitcher maps characters based on **physical key positions** on the keyboard. The same physical key produces different characters depending on the active layout — LangSwitcher reverses this mapping.
 
 ## Installation
 
 ### Download DMG (Recommended)
 
 1. Go to [Releases](https://github.com/reg2005/langSwitcher/releases/latest)
-2. Download `LayoutSwitcher-x.x.x.dmg`
-3. Open the DMG and drag **LayoutSwitcher** to **Applications**
-4. Launch LayoutSwitcher
+2. Download `LangSwitcher-x.x.x.dmg`
+3. Open the DMG and drag **LangSwitcher** to **Applications**
+4. Launch LangSwitcher
 5. Grant **Accessibility** permission when prompted
 
 ### Build from Source
@@ -53,20 +53,20 @@ LayoutSwitcher maps characters based on **physical key positions** on the keyboa
 ```bash
 # Clone the repository
 git clone https://github.com/reg2005/langSwitcher.git
-cd LayoutSwitcher
+cd LangSwitcher
 
 # Build with xcodebuild
-xcodebuild -project LayoutSwitcher.xcodeproj \
-  -scheme LayoutSwitcher \
+xcodebuild -project LangSwitcher.xcodeproj \
+  -scheme LangSwitcher \
   -configuration Release \
   -derivedDataPath build \
   CODE_SIGN_IDENTITY="-" \
   build
 
-# The app is at build/Build/Products/Release/LayoutSwitcher.app
+# The app is at build/Build/Products/Release/LangSwitcher.app
 ```
 
-Or open `LayoutSwitcher.xcodeproj` in Xcode and press `⌘R`.
+Or open `LangSwitcher.xcodeproj` in Xcode and press `⌘R`.
 
 ## Usage
 
@@ -80,7 +80,7 @@ Or open `LayoutSwitcher.xcodeproj` in Xcode and press `⌘R`.
 
 ### Menu Bar
 
-LayoutSwitcher lives in your menu bar with a keyboard icon (⌨). Click it to:
+LangSwitcher lives in your menu bar with a keyboard icon (⌨). Click it to:
 
 - Convert selected text manually
 - See active keyboard layouts
@@ -101,7 +101,7 @@ Access settings from the menu bar icon → **Settings** (or `⌘,`):
 
 ## Supported Layouts
 
-LayoutSwitcher detects layouts from your **System Settings > Keyboard > Input Sources**. Currently supported:
+LangSwitcher detects layouts from your **System Settings > Keyboard > Input Sources**. Currently supported:
 
 | Layout | Language Code | Physical Layout |
 |--------|--------------|-----------------|
@@ -118,10 +118,10 @@ Adding a new layout is straightforward — see [Contributing](#contributing).
 ## Architecture
 
 ```
-LayoutSwitcher/
+LangSwitcher/
 ├── Sources/
 │   ├── App/
-│   │   ├── LayoutSwitcherApp.swift    # SwiftUI App entry point
+│   │   ├── LangSwitcherApp.swift    # SwiftUI App entry point
 │   │   ├── AppDelegate.swift          # App lifecycle, hotkey registration
 │   │   └── StatusBarController.swift  # Menu bar icon and menu
 │   ├── Views/
@@ -173,7 +173,7 @@ Input: "ghbdtn" (typed on US layout when Russian was intended)
 
 ## Permissions
 
-LayoutSwitcher requires **Accessibility** access to:
+LangSwitcher requires **Accessibility** access to:
 - Read selected text (via simulated `⌘C`)
 - Replace text (via simulated `⌘V`)
 
@@ -189,7 +189,7 @@ The app does **not**:
 
 Contributions are welcome! Here's how to add a new keyboard layout:
 
-1. Open `LayoutSwitcher/Sources/Models/KeyboardLayout.swift`
+1. Open `LangSwitcher/Sources/Models/KeyboardLayout.swift`
 2. Add a new static property to `LayoutCharacterMap` with the character mapping
 3. Add the pattern to `allMaps` array
 4. Test with the actual keyboard layout installed
@@ -212,10 +212,10 @@ static let italian: [Character: Character] = {
 ```bash
 # Clone
 git clone https://github.com/reg2005/langSwitcher.git
-cd LayoutSwitcher
+cd LangSwitcher
 
 # Open in Xcode
-open LayoutSwitcher.xcodeproj
+open LangSwitcher.xcodeproj
 
 # Build & Run
 # Press ⌘R in Xcode

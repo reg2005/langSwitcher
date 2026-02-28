@@ -30,10 +30,10 @@ final class StatusBarController {
     
     private func setupStatusBarButton() {
         if let button = statusItem.button {
-            let image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LayoutSwitcher")
+            let image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LangSwitcher")
             image?.isTemplate = true
             button.image = image
-            button.toolTip = "LayoutSwitcher — \(settingsManager.hotkeyDescription) to convert"
+            button.toolTip = "LangSwitcher — \(settingsManager.hotkeyDescription) to convert"
         }
         statusItem.menu = menu
     }
@@ -42,12 +42,12 @@ final class StatusBarController {
         menu.removeAllItems()
         
         // Header
-        let headerItem = NSMenuItem(title: "LayoutSwitcher", action: nil, keyEquivalent: "")
+        let headerItem = NSMenuItem(title: "LangSwitcher", action: nil, keyEquivalent: "")
         headerItem.isEnabled = false
         let attrs: [NSAttributedString.Key: Any] = [
             .font: NSFont.boldSystemFont(ofSize: 13)
         ]
-        headerItem.attributedTitle = NSAttributedString(string: "⌨ LayoutSwitcher", attributes: attrs)
+        headerItem.attributedTitle = NSAttributedString(string: "⌨ LangSwitcher", attributes: attrs)
         menu.addItem(headerItem)
         
         menu.addItem(NSMenuItem.separator())
@@ -98,7 +98,7 @@ final class StatusBarController {
         
         // About
         let aboutItem = NSMenuItem(
-            title: "About LayoutSwitcher",
+            title: "About LangSwitcher",
             action: #selector(openAbout),
             keyEquivalent: ""
         )
@@ -109,7 +109,7 @@ final class StatusBarController {
         
         // Quit
         let quitItem = NSMenuItem(
-            title: "Quit LayoutSwitcher",
+            title: "Quit LangSwitcher",
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -139,7 +139,7 @@ final class StatusBarController {
             backing: .buffered,
             defer: false
         )
-        window.title = "LayoutSwitcher Settings"
+        window.title = "LangSwitcher Settings"
         window.center()
         window.contentView = NSHostingView(rootView: settingsView)
         window.isReleasedWhenClosed = false
@@ -163,7 +163,7 @@ final class StatusBarController {
             backing: .buffered,
             defer: false
         )
-        window.title = "About LayoutSwitcher"
+        window.title = "About LangSwitcher"
         window.center()
         window.contentView = NSHostingView(rootView: AboutView())
         window.isReleasedWhenClosed = false

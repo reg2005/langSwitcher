@@ -8,7 +8,7 @@ struct PermissionsView: View {
             Text("Permissions")
                 .font(.headline)
             
-            Text("LayoutSwitcher needs Accessibility access to read and replace selected text in other applications.")
+            Text("LangSwitcher needs Accessibility access to read and replace selected text in other applications.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
@@ -22,7 +22,7 @@ struct PermissionsView: View {
                         Text("Accessibility Access")
                             .font(.body)
                             .bold()
-                        Text(hasAccessibility ? "Granted — LayoutSwitcher can convert text" : "Not granted — Please enable in System Settings")
+                        Text(hasAccessibility ? "Granted — LangSwitcher can convert text" : "Not granted — Please enable in System Settings")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -48,8 +48,8 @@ struct PermissionsView: View {
                         
                         Text("1. Open System Settings > Privacy & Security > Accessibility")
                         Text("2. Click the lock icon to make changes")
-                        Text("3. Enable LayoutSwitcher in the list")
-                        Text("4. Restart LayoutSwitcher if needed")
+                        Text("3. Enable LangSwitcher in the list")
+                        Text("4. Restart LangSwitcher if needed")
                     }
                     .font(.caption)
                     .padding(4)
