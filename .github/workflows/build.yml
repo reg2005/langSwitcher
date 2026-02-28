@@ -52,6 +52,27 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           build
 
+    - name: Ad-hoc sign app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        # Strip linker-only signature and re-sign entire bundle (seals resources + Info.plist)
+        codesign --force --deep -s - "$APP_PATH"
+        echo "=== Codesign verify ==="
+        codesign -dvvv "$APP_PATH" 2>&1
+        echo "=== spctl assess ==="
+        spctl --assess --type exec "$APP_PATH" 2>&1 || true
+
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
     - name: Create DMG (arm64)
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
@@ -69,17 +90,6 @@ jobs:
           "$DMG_NAME"
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
-
-    - name: Verify app bundle
-      run: |
-        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        echo "=== App bundle contents ==="
-        ls -la "$APP_PATH/Contents/"
-        ls -la "$APP_PATH/Contents/MacOS/"
-        echo "=== Binary info ==="
-        file "$APP_PATH/Contents/MacOS/LangSwitcher"
-        echo "=== Binary size ==="
-        du -sh "$APP_PATH"
 
     - name: Create ZIP with ditto (preserves permissions)
       run: |
@@ -126,6 +136,26 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           build
 
+    - name: Ad-hoc sign app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        codesign --force --deep -s - "$APP_PATH"
+        echo "=== Codesign verify ==="
+        codesign -dvvv "$APP_PATH" 2>&1
+        echo "=== spctl assess ==="
+        spctl --assess --type exec "$APP_PATH" 2>&1 || true
+
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
     - name: Create DMG (x86_64)
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
@@ -143,17 +173,6 @@ jobs:
           "$DMG_NAME"
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
-
-    - name: Verify app bundle
-      run: |
-        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        echo "=== App bundle contents ==="
-        ls -la "$APP_PATH/Contents/"
-        ls -la "$APP_PATH/Contents/MacOS/"
-        echo "=== Binary info ==="
-        file "$APP_PATH/Contents/MacOS/LangSwitcher"
-        echo "=== Binary size ==="
-        du -sh "$APP_PATH"
 
     - name: Create ZIP with ditto (preserves permissions)
       run: |
@@ -200,6 +219,26 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           build
 
+    - name: Ad-hoc sign app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        codesign --force --deep -s - "$APP_PATH"
+        echo "=== Codesign verify ==="
+        codesign -dvvv "$APP_PATH" 2>&1
+        echo "=== spctl assess ==="
+        spctl --assess --type exec "$APP_PATH" 2>&1 || true
+
+    - name: Verify app bundle
+      run: |
+        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
+        echo "=== App bundle contents ==="
+        ls -la "$APP_PATH/Contents/"
+        ls -la "$APP_PATH/Contents/MacOS/"
+        echo "=== Binary info ==="
+        file "$APP_PATH/Contents/MacOS/LangSwitcher"
+        echo "=== Binary size ==="
+        du -sh "$APP_PATH"
+
     - name: Create DMG (universal)
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
@@ -217,17 +256,6 @@ jobs:
           "$DMG_NAME"
         
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
-
-    - name: Verify app bundle
-      run: |
-        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        echo "=== App bundle contents ==="
-        ls -la "$APP_PATH/Contents/"
-        ls -la "$APP_PATH/Contents/MacOS/"
-        echo "=== Binary info ==="
-        file "$APP_PATH/Contents/MacOS/LangSwitcher"
-        echo "=== Binary size ==="
-        du -sh "$APP_PATH"
 
     - name: Create ZIP with ditto (preserves permissions)
       run: |
