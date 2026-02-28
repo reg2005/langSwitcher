@@ -1,5 +1,7 @@
 # LangSwitcher
 
+[English](README.md) | [Русский](README.ru.md)
+
 **Open-source keyboard layout text converter for macOS.**
 
 Typed text in the wrong keyboard layout? Select it, press a hotkey, and LangSwitcher instantly converts it to the correct layout. No more retyping `ghbdtn` when you meant `привет`.
@@ -28,7 +30,7 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 - **Conversion Log** — every conversion is logged to a local SQLite database with a UI for reviewing and labeling (correct/incorrect) for future ML training
 - **JSON export** — export conversion logs for data analysis or model training
 - **Menu bar app** — lives quietly in your status bar, always ready
-- **Multiple layouts** — supports English, Russian, Ukrainian, German, French, Spanish
+- **Multiple layouts** — supports English, Russian, German, French, Spanish (5 layouts)
 - **Punctuation preservation** — `?`, `!`, `/` and other punctuation stay unchanged during conversion
 - **Zero dependencies** — pure Swift, no external libraries, no dictionaries
 - **Privacy first** — no data leaves your Mac, no analytics, no network access
@@ -159,7 +161,6 @@ LangSwitcher detects layouts from your **System Settings > Keyboard > Input Sour
 | U.S. (QWERTY) | `en` | QWERTY |
 | ABC | `en` | QWERTY |
 | Russian | `ru` | ЙЦУКЕН |
-| Ukrainian | `uk` | ЙЦУКЕН (Ukrainian) |
 | German | `de` | QWERTZ |
 | French | `fr` | AZERTY |
 | Spanish | `es` | QWERTY (Spanish) |
@@ -203,7 +204,11 @@ LangSwitcher/
 ├── screenshots/
 │   └── general.png                     # Settings General tab
 └── docs/
-    └── index.html                      # Project website
+    ├── index.html                      # Locale router (redirects to en/ru)
+    ├── en.html                         # English project page
+    ├── ru.html                         # Russian project page
+    └── screenshots/
+        └── general.png                 # Screenshot for Pages
 ```
 
 ### How Conversion Works
