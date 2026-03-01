@@ -2,9 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=/langSwitcher/en">
-  <link rel="canonical" href="/langSwitcher/en">
   <title>LangSwitcher — Keyboard Layout Converter for macOS</title>
+  <script>
+    (function() {
+      var lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      var target = '/langSwitcher/en';
+      if (lang === 'ru' || lang.startsWith('ru-')) {
+        target = '/langSwitcher/ru';
+      }
+      window.location.replace(target);
+    })();
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/langSwitcher/en">
+  </noscript>
+  <link rel="canonical" href="/langSwitcher/en">
 </head>
 <body>
   <p>Redirecting to <a href="/langSwitcher/en">LangSwitcher Documentation</a>...</p>

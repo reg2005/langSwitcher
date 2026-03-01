@@ -8,23 +8,24 @@ navigation: false
 ---
 orientation: horizontal
 ---
-  #title
-  Fix mistyped text in one keystroke
 
-  #description
-  Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher converts it instantly. No selection needed — Smart Conversion handles it.
+#title
+Fix mistyped text in one keystroke
 
-  #links
-  ::u-button
+#description
+Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher converts it instantly. No selection needed — Smart Conversion handles it.
+
+#links
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher/releases/latest
   icon: i-lucide-download
   size: xl
   ---
   Download for macOS
-  ::
+  :::
 
-  ::u-button
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher
   icon: i-simple-icons-github
@@ -32,147 +33,167 @@ orientation: horizontal
   variant: subtle
   ---
   View on GitHub
-  ::
+  :::
 ::
 
 ::u-page-section
-  #title
-  How it works
+#title
+Demo
 
-  #default
+#default
+<video controls playsinline muted style="width:100%;max-width:720px;border-radius:12px;margin:0 auto;display:block">
+  <source src="/langSwitcher/langSwitch.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+::
+
+::u-page-section
+#title
+How it works
+
+#default
   :::u-page-columns
     ::::u-page-card
     ---
     icon: i-lucide-keyboard
     ---
-      #title
-      1. You type in the wrong layout
+    #title
+    1. You type in the wrong layout
 
-      #description
-      `ghbdtn rfr ltkf` — happens to every bilingual user.
+    #description
+    `ghbdtn rfr ltkf` — happens to every bilingual user.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-zap
     ---
-      #title
-      2. Press ⇧⇧ (Double Shift)
+    #title
+    2. Press ⇧⇧ (Double Shift)
 
-      #description
-      No need to select text — Smart Conversion detects the boundary automatically.
+    #description
+    No need to select text — Smart Conversion detects the boundary automatically.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-check-circle
     ---
-      #title
-      3. Text is fixed
+    #title
+    3. Text is fixed
 
-      #description
-      `привет как дела` — converted in milliseconds, pasted back in place.
+    #description
+    `привет как дела` — converted in milliseconds, pasted back in place.
     ::::
   :::
 ::
 
 ::u-page-section
-  #title
-  Features
+#title
+Features
 
-  #default
+#default
   :::u-page-grid
     ::::u-page-card
     ---
     icon: i-lucide-zap
     ---
-      #title
-      Instant Conversion
+    #title
+    Instant Conversion
 
-      #description
-      Press a hotkey and text is converted in milliseconds through clipboard-based replacement. Works in any app.
+    #description
+    Press a hotkey and text is converted in milliseconds through clipboard-based replacement. Works in any app.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-brain
     ---
-      #title
-      Smart Conversion
+    #title
+    Smart Conversion
 
-      #description
-      No need to select text. Greedy Line mode auto-detects where the wrong layout begins and converts only what's needed.
+    #description
+    No need to select text. Greedy Line mode auto-detects where the wrong layout begins and converts only what's needed.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-keyboard
     ---
-      #title
-      Double Shift Hotkey
+    #title
+    Double Shift Hotkey
 
-      #description
-      Default hotkey: press Shift twice quickly. Or record any custom shortcut in Settings.
+    #description
+    Default hotkey: press Shift twice quickly. Or record any custom shortcut in Settings.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-scroll-text
     ---
-      #title
-      Conversion Log
+    #title
+    Conversion Log
 
-      #description
-      Every conversion is logged to a local SQLite database. Rate results, export as JSON for ML training.
+    #description
+    Every conversion is logged to a local SQLite database. Rate results, export as JSON for ML training.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-globe
     ---
-      #title
-      6 Layouts
+    #title
+    5 Layouts
 
-      #description
-      English, Russian, Ukrainian, German, French, Spanish. Auto-detected from system keyboard settings.
+    #description
+    English, Russian, German, French, Spanish. Auto-detected from system keyboard settings.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-shield-check
     ---
-      #title
-      Privacy First
+    #title
+    Privacy First
 
-      #description
-      No data leaves your Mac. No analytics, no telemetry, no network access. Fully offline. Open source under MIT.
+    #description
+    No data leaves your Mac. No analytics, no telemetry, no network access. Fully offline. Open source under MIT.
     ::::
   :::
 ::
 
 ::u-page-section
-  #title
-  Open Source & Community
+#title
+Open Source & Community
 
-  #description
-  LangSwitcher is free, open-source software under the MIT license. Contributions are welcome!
+#description
+LangSwitcher is free, open-source software under the MIT license. Contributions are welcome!
 
-  #links
-  ::u-button
+#links
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher/issues
   icon: i-lucide-bug
   variant: subtle
   ---
   Report a Bug
-  ::
+  :::
 
-  ::u-button
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher
   icon: i-lucide-git-pull-request
   variant: subtle
   ---
   Contribute
-  ::
+  :::
+
+  :::u-button
+  ---
+  to: /en/guide/donate
+  icon: i-lucide-hand-heart
+  variant: subtle
+  ---
+  Donate
+  :::
 ::

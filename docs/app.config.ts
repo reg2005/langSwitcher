@@ -27,6 +27,10 @@ export default defineAppConfig({
         label: 'Contribute',
         to: 'https://github.com/reg2005/langSwitcher',
         target: '_blank',
+      }, {
+        icon: 'i-lucide-hand-heart',
+        label: 'Donate',
+        to: '/guide/donate',
       }],
     },
   },

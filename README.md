@@ -13,6 +13,12 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-brightgreen.svg)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5-orange.svg)](https://swift.org/)
 
+> If you find LangSwitcher useful, consider [supporting the project](#donate) — any contribution is appreciated!
+
+## Demo
+
+https://github.com/reg2005/langSwitcher/raw/main/screenshots/langSwitch.mp4
+
 ## Screenshot
 
 ![LangSwitcher Settings — General](screenshots/general.png)
@@ -30,7 +36,7 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 - **Conversion Log** — optionally log conversions to a local SQLite database (disabled by default for privacy). Review and label entries (correct/incorrect) for future ML training
 - **JSON export** — export conversion logs for data analysis or model training
 - **Menu bar app** — lives quietly in your status bar, always ready
-- **Multiple layouts** — supports English, Russian, German, French, Spanish (5 layouts)
+- **Multiple layouts** — English, Russian, German, French, Spanish (5 layouts)
 - **Punctuation preservation** — `?`, `!`, `/` and other punctuation stay unchanged during conversion
 - **Zero dependencies** — pure Swift, no external libraries, no dictionaries
 - **Privacy first** — no data leaves your Mac, no analytics, no network access
@@ -210,13 +216,15 @@ LangSwitcher/
 │   ├── build.yml                       # CI: test + build DMGs (Intel/ARM/Universal) + release
 │   └── pages.yml                       # GitHub Pages deployment
 ├── screenshots/
-│   └── general.png                     # Settings General tab
-└── docs/
-    ├── index.html                      # Locale router (redirects to en/ru)
-    ├── en.html                         # English project page
-    ├── ru.html                         # Russian project page
-    └── screenshots/
-        └── general.png                 # Screenshot for Pages
+│   ├── general.png                     # Settings General tab
+│   └── langSwitch.mp4                  # Demo video
+└── docs/                              # Docus v4 documentation site
+    ├── nuxt.config.ts                  # Nuxt/Docus config with i18n
+    ├── app.config.ts                   # App config (header, SEO, socials)
+    ├── package.json                    # Docus dependencies
+    └── content/
+        ├── en/                         # English documentation
+        └── ru/                         # Russian documentation
 ```
 
 ### How Conversion Works
@@ -403,6 +411,25 @@ open LangSwitcher.xcodeproj
 ```
 
 See [AGENTS.md](AGENTS.md) for AI agent / contributor guidelines.
+
+## Donate
+
+LangSwitcher is free and open-source. If you find it useful, any contribution is welcome and helps keep the project alive. Thank you for your support!
+
+| Network | Address |
+|---------|---------|
+| **Ethereum** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Tron** | `TDAyNkS36eKyqv9s4KQpu4ebWciQ2bqdW3` |
+| **Bitcoin** | `bc1qtqm7rgma8dcgqc50lmzmyxn729yqrtf9zs7asx` |
+| **Solana** | `A4jzTGxP7tbhyDFrcWJKdsA8v5xUwF6UzvC7RFmDRrfi` |
+| **Linea** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Base** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **BNB Chain** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Sei** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Polygon** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **OP (Optimism)** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Arbitrum** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
+| **Fantom** | `0x30c8b011AF68a963694Ce1E5f54A545442acFEfA` |
 
 ## License
 

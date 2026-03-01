@@ -8,23 +8,24 @@ navigation: false
 ---
 orientation: horizontal
 ---
-  #title
-  Исправьте текст одним нажатием
 
-  #description
-  Набрали текст не в той раскладке? Нажмите **Shift** дважды — и LangSwitcher мгновенно его преобразует. Выделять текст не нужно — умное преобразование всё сделает сам.
+#title
+Исправьте текст одним нажатием
 
-  #links
-  ::u-button
+#description
+Набрали текст не в той раскладке? Нажмите **Shift** дважды — и LangSwitcher мгновенно его преобразует. Выделять текст не нужно — умное преобразование всё сделает сам.
+
+#links
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher/releases/latest
   icon: i-lucide-download
   size: xl
   ---
   Скачать для macOS
-  ::
+  :::
 
-  ::u-button
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher
   icon: i-simple-icons-github
@@ -32,147 +33,167 @@ orientation: horizontal
   variant: subtle
   ---
   GitHub
-  ::
+  :::
 ::
 
 ::u-page-section
-  #title
-  Как это работает
+#title
+Демо
 
-  #default
+#default
+<video controls playsinline muted style="width:100%;max-width:720px;border-radius:12px;margin:0 auto;display:block">
+  <source src="/langSwitcher/langSwitch.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+::
+
+::u-page-section
+#title
+Как это работает
+
+#default
   :::u-page-columns
     ::::u-page-card
     ---
     icon: i-lucide-keyboard
     ---
-      #title
-      1. Набираете не в той раскладке
+    #title
+    1. Набираете не в той раскладке
 
-      #description
-      `ghbdtn rfr ltkf` — знакомо каждому, кто пользуется двумя языками.
+    #description
+    `ghbdtn rfr ltkf` — знакомо каждому, кто пользуется двумя языками.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-zap
     ---
-      #title
-      2. Нажимаете ⇧⇧ (двойной Shift)
+    #title
+    2. Нажимаете ⇧⇧ (двойной Shift)
 
-      #description
-      Выделять текст не нужно — умное преобразование само определит границу.
+    #description
+    Выделять текст не нужно — умное преобразование само определит границу.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-check-circle
     ---
-      #title
-      3. Текст исправлен
+    #title
+    3. Текст исправлен
 
-      #description
-      `привет как дела` — преобразован за миллисекунды, вставлен на место.
+    #description
+    `привет как дела` — преобразован за миллисекунды, вставлен на место.
     ::::
   :::
 ::
 
 ::u-page-section
-  #title
-  Возможности
+#title
+Возможности
 
-  #default
+#default
   :::u-page-grid
     ::::u-page-card
     ---
     icon: i-lucide-zap
     ---
-      #title
-      Мгновенное преобразование
+    #title
+    Мгновенное преобразование
 
-      #description
-      Нажмите горячую клавишу — текст преобразуется за миллисекунды через буфер обмена. Работает в любом приложении.
+    #description
+    Нажмите горячую клавишу — текст преобразуется за миллисекунды через буфер обмена. Работает в любом приложении.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-brain
     ---
-      #title
-      Умное преобразование
+    #title
+    Умное преобразование
 
-      #description
-      Не нужно выделять текст. Режим «Жадная строка» автоматически определяет, где начинается неправильная раскладка.
+    #description
+    Не нужно выделять текст. Режим «Жадная строка» автоматически определяет, где начинается неправильная раскладка.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-keyboard
     ---
-      #title
-      Двойной Shift
+    #title
+    Двойной Shift
 
-      #description
-      Горячая клавиша по умолчанию: два быстрых нажатия Shift. Или настройте любую другую комбинацию.
+    #description
+    Горячая клавиша по умолчанию: два быстрых нажатия Shift. Или настройте любую другую комбинацию.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-scroll-text
     ---
-      #title
-      Журнал преобразований
+    #title
+    Журнал преобразований
 
-      #description
-      Каждое преобразование записывается в локальную базу SQLite. Оценивайте результаты, экспортируйте в JSON.
+    #description
+    Каждое преобразование записывается в локальную базу SQLite. Оценивайте результаты, экспортируйте в JSON.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-globe
     ---
-      #title
-      6 раскладок
+    #title
+    5 раскладок
 
-      #description
-      Английская, русская, украинская, немецкая, французская, испанская. Определяются автоматически из системных настроек.
+    #description
+    Английская, русская, немецкая, французская, испанская. Определяются автоматически из системных настроек.
     ::::
 
     ::::u-page-card
     ---
     icon: i-lucide-shield-check
     ---
-      #title
-      Приватность
+    #title
+    Приватность
 
-      #description
-      Данные не покидают ваш Mac. Никакой аналитики, телеметрии, сетевых запросов. Полностью офлайн. Открытый код, MIT.
+    #description
+    Данные не покидают ваш Mac. Никакой аналитики, телеметрии, сетевых запросов. Полностью офлайн. Открытый код, MIT.
     ::::
   :::
 ::
 
 ::u-page-section
-  #title
-  Открытый код и сообщество
+#title
+Открытый код и сообщество
 
-  #description
-  LangSwitcher — бесплатное ПО с открытым исходным кодом под лицензией MIT. Контрибьюты приветствуются!
+#description
+LangSwitcher — бесплатное ПО с открытым исходным кодом под лицензией MIT. Контрибьюты приветствуются!
 
-  #links
-  ::u-button
+#links
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher/issues
   icon: i-lucide-bug
   variant: subtle
   ---
   Сообщить об ошибке
-  ::
+  :::
 
-  ::u-button
+  :::u-button
   ---
   to: https://github.com/reg2005/langSwitcher
   icon: i-lucide-git-pull-request
   variant: subtle
   ---
   Внести вклад
-  ::
+  :::
+
+  :::u-button
+  ---
+  to: /ru/guide/donate
+  icon: i-lucide-hand-heart
+  variant: subtle
+  ---
+  Поддержать
+  :::
 ::
