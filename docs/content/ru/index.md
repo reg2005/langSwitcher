@@ -34,6 +34,26 @@ orientation: horizontal
   ---
   GitHub
   :::
+
+  :::u-button
+  ---
+  to: /ru/guide/donate
+  icon: i-lucide-hand-heart
+  size: xl
+  variant: subtle
+  ---
+  Задонатить
+  :::
+
+  :::u-button
+  ---
+  to: https://github.com/reg2005/langSwitcher/issues
+  icon: i-lucide-bug
+  size: xl
+  variant: subtle
+  ---
+  Сообщить об ошибке
+  :::
 ::
 
 ::u-page-section

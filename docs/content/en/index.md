@@ -34,6 +34,26 @@ Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher conve
   ---
   View on GitHub
   :::
+
+  :::u-button
+  ---
+  to: /en/guide/donate
+  icon: i-lucide-hand-heart
+  size: xl
+  variant: subtle
+  ---
+  Donate
+  :::
+
+  :::u-button
+  ---
+  to: https://github.com/reg2005/langSwitcher/issues
+  icon: i-lucide-bug
+  size: xl
+  variant: subtle
+  ---
+  Report a Bug
+  :::
 ::
 
 ::u-page-section
