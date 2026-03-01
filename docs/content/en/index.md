@@ -45,25 +45,9 @@ Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher conve
   Donate
   :::
 
-  :::u-button
-  ---
-  to: https://github.com/reg2005/langSwitcher/issues
-  icon: i-lucide-bug
-  size: xl
-  variant: subtle
-  ---
-  Report a Bug
-  :::
-::
-
-::u-page-section
-#title
-Demo
-
-#default
-<video controls playsinline muted style="width:100%;max-width:720px;border-radius:12px;margin:0 auto;display:block">
+#right
+<video autoplay loop playsinline muted style="width:100%;max-width:480px;border-radius:12px">
   <source src="/langSwitcher/langSwitch.mp4" type="video/mp4">
-  Your browser does not support the video tag.
 </video>
 ::
 
