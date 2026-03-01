@@ -18,11 +18,11 @@ Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher conve
 #links
   :::u-button
   ---
-  to: https://github.com/reg2005/langSwitcher/releases/latest
-  icon: i-lucide-download
+  to: /en/getting-started/installation
+  icon: i-lucide-rocket
   size: xl
   ---
-  Download for macOS
+  Getting Started
   :::
 
   :::u-button

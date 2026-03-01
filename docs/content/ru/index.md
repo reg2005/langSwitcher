@@ -18,11 +18,11 @@ orientation: horizontal
 #links
   :::u-button
   ---
-  to: https://github.com/reg2005/langSwitcher/releases/latest
-  icon: i-lucide-download
+  to: /ru/getting-started/installation
+  icon: i-lucide-rocket
   size: xl
   ---
-  Скачать для macOS
+  Начать
   :::
 
   :::u-button
