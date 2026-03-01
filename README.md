@@ -15,6 +15,8 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 
 > If you find LangSwitcher useful, consider [supporting the project](#donate) — any contribution is appreciated!
 
+**[Documentation](https://reg2005.github.io/langSwitcher/en)** | **[Документация (RU)](https://reg2005.github.io/langSwitcher/ru)**
+
 ## Demo
 
 https://github.com/reg2005/langSwitcher/raw/main/screenshots/langSwitch.mp4
