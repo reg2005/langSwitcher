@@ -2,9 +2,9 @@
   "name": "langswitcher-docs",
   "private": true,
   "scripts": {
-    "dev": "nuxt dev --extend docus",
-    "build": "nuxt build --extend docus",
-    "generate": "nuxt generate --extend docus"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate"
   },
   "dependencies": {
     "docus": "latest",
