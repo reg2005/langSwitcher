@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — LangSwitcher</title>
+    <meta name="description" content="LangSwitcher support page. FAQ, troubleshooting, and how to get help.">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --border: #262626;
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6;
+            --accent-soft: #1d4ed8;
+            --green: #22c55e;
+            --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100; padding: 16px 0;
+        }
+        nav .container { display: flex; justify-content: space-between; align-items: center; max-width: 960px; }
+        .logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .logo-icon { font-size: 24px; }
+        .nav-links { display: flex; gap: 24px; list-style: none; align-items: center; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .lang-switch { padding: 4px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
+        .lang-switch:hover { border-color: #444; color: var(--text); }
+
+        /* Content */
+        .page-header { padding: 140px 0 48px; text-align: center; }
+        .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .page-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-header p { font-size: 18px; color: var(--text-secondary); }
+
+        .content { padding-bottom: 80px; }
+        .content h2 { font-size: 24px; font-weight: 700; margin: 48px 0 16px; letter-spacing: -0.01em; }
+        .content h2:first-of-type { margin-top: 0; }
+        .content p { font-size: 16px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.7; }
+        .content a { color: var(--accent); text-decoration: none; }
+        .content a:hover { text-decoration: underline; }
+        .content code { background: #1e1e1e; padding: 2px 8px; border-radius: 6px; font-size: 14px; font-family: 'SF Mono', 'JetBrains Mono', monospace; color: #e5e5e5; }
+        .content ol { margin-bottom: 16px; padding-left: 24px; }
+        .content ol li { font-size: 16px; color: var(--text-secondary); padding: 4px 0; line-height: 1.7; }
+
+        .faq-item {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 24px; margin: 16px 0;
+        }
+        .faq-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+        .faq-item p { margin-bottom: 0; }
+        .faq-item p + p { margin-top: 12px; }
+        .faq-item code { background: #1e1e1e; padding: 2px 8px; border-radius: 6px; font-size: 14px; font-family: 'SF Mono', 'JetBrains Mono', monospace; color: #e5e5e5; }
+        .faq-item ol { margin: 12px 0 0; padding-left: 24px; }
+        .faq-item ol li { font-size: 15px; color: var(--text-secondary); padding: 2px 0; line-height: 1.7; }
+
+        .contact-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 32px; margin: 32px 0; text-align: center;
+        }
+        .contact-box h3 { font-size: 20px; margin-bottom: 12px; }
+        .contact-box p { margin-bottom: 16px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-soft); transform: translateY(-1px); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 48px 0; text-align: center; }
+        footer .container { max-width: 960px; }
+        footer p { color: var(--text-secondary); font-size: 14px; }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a { margin: 0 12px; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 28px; }
+            .nav-links { display: none; }
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .page-header, .content { animation: fadeInUp 0.6s ease-out; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="en.html" class="logo"><span class="logo-icon">&#x2328;</span> LangSwitcher</a>
+        <ul class="nav-links">
+            <li><a href="en.html">Home</a></li>
+            <li><a href="privacy-en.html">Privacy</a></li>
+            <li><a href="https://github.com/reg2005/langSwitcher">GitHub</a></li>
+            <li><a href="support-ru.html" class="lang-switch">RU</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1><span>Support</span></h1>
+        <p>Frequently asked questions and how to get help</p>
+    </div>
+
+    <div class="content">
+        <h2>FAQ</h2>
+
+        <div class="faq-item">
+            <h3>Why does LangSwitcher need Accessibility permission?</h3>
+            <p>LangSwitcher uses the macOS Accessibility API to read selected text from the active application and paste back the converted result. Without this permission, the app cannot access text in other apps. This is the same mechanism used by many macOS text utilities.</p>
+            <p>To enable: <strong>System Settings &rarr; Privacy &amp; Security &rarr; Accessibility</strong> &rarr; toggle on LangSwitcher.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>macOS says the app is &ldquo;damaged&rdquo; and can&rsquo;t be opened</h3>
+            <p>This happens because macOS quarantines apps downloaded from the internet that are not from the App Store. To fix it, open Terminal and run:</p>
+            <p><code>xattr -cr /Applications/LangSwitcher.app</code></p>
+            <p>Then try opening the app again. This only needs to be done once. Alternatively, you can right-click the app and choose &ldquo;Open&rdquo; to bypass Gatekeeper.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>How do I change the hotkey?</h3>
+            <p>Open LangSwitcher settings (click the menu bar icon &rarr; Settings), go to the <strong>Hotkey</strong> tab. You can:</p>
+            <ol>
+                <li>Use the default <strong>Double Shift</strong> (press Shift twice quickly)</li>
+                <li>Record a custom hotkey by clicking &ldquo;Record&rdquo; and pressing your preferred key combination</li>
+            </ol>
+        </div>
+
+        <div class="faq-item">
+            <h3>What keyboard layouts are supported?</h3>
+            <p>LangSwitcher currently supports 6 keyboard layouts:</p>
+            <ol>
+                <li><strong>English</strong> (U.S. / ABC) &mdash; QWERTY</li>
+                <li><strong>Russian</strong> &mdash; JCUKEN</li>
+                <li><strong>Ukrainian</strong> &mdash; JCUKEN (UA)</li>
+                <li><strong>German</strong> &mdash; QWERTZ</li>
+                <li><strong>French</strong> &mdash; AZERTY</li>
+                <li><strong>Spanish</strong> &mdash; QWERTY (ES)</li>
+            </ol>
+            <p>Layouts are auto-detected from your system keyboard settings. More layouts will be added in future versions.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>What is Smart Conversion?</h3>
+            <p>Smart Conversion lets you convert text without manually selecting it first. Three modes are available:</p>
+            <ol>
+                <li><strong>Greedy Line</strong> (default) &mdash; Automatically selects to the start of the line, finds where the wrong layout begins, and converts only the affected portion</li>
+                <li><strong>Last Word</strong> &mdash; Converts only the last word you typed</li>
+                <li><strong>Disabled</strong> &mdash; Only works with explicit text selection</li>
+            </ol>
+        </div>
+
+        <div class="faq-item">
+            <h3>Does LangSwitcher work offline?</h3>
+            <p>Yes, completely. LangSwitcher makes zero network requests. All conversion is done algorithmically on your Mac. No internet connection is ever required.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>How do I export the conversion log?</h3>
+            <p>Open Settings &rarr; <strong>Log</strong> tab. Click the &ldquo;Export JSON&rdquo; button. The log is exported as a JSON file that you can use for analysis or ML training data.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>The conversion result is incorrect</h3>
+            <p>This can happen when text contains characters from multiple layouts. Try:</p>
+            <ol>
+                <li>Manually selecting the specific text you want to convert, then pressing the hotkey</li>
+                <li>Switching Smart Conversion mode in Settings (try &ldquo;Last Word&rdquo; or &ldquo;Disabled&rdquo;)</li>
+                <li>Checking that the correct keyboard layouts are enabled in System Settings &rarr; Keyboard &rarr; Input Sources</li>
+            </ol>
+            <p>If the issue persists, please <a href="https://github.com/reg2005/langSwitcher/issues">report it on GitHub</a> with the original text and expected result.</p>
+        </div>
+
+        <h2>Get Help</h2>
+
+        <div class="contact-box">
+            <h3>Found a bug or have a feature request?</h3>
+            <p>LangSwitcher is open source. The best way to get help is to open an issue on GitHub.</p>
+            <a href="https://github.com/reg2005/langSwitcher/issues" class="btn btn-primary">Open GitHub Issue</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-links">
+            <a href="en.html">Home</a>
+            <a href="privacy-en.html">Privacy Policy</a>
+            <a href="https://github.com/reg2005/langSwitcher">GitHub</a>
+        </div>
+        <p>LangSwitcher is open source under the <a href="https://github.com/reg2005/langSwitcher/blob/main/LICENSE">MIT License</a>.</p>
+    </div>
+</footer>
+
+</body>
+</html>

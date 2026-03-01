@@ -1,73 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangSwitcher — Support / Поддержка</title>
+    <title>LangSwitcher — Support</title>
     <style>
-        body {
-            background: #0a0a0a; color: #e4e4e7;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 720px; margin: 0 auto; padding: 40px 24px;
-            line-height: 1.7;
-        }
-        h1 { color: #fafafa; font-size: 28px; border-bottom: 1px solid #27272a; padding-bottom: 12px; }
-        h2 { color: #fafafa; font-size: 20px; margin-top: 32px; }
+        body { background: #0a0a0a; color: #fafafa; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loader { text-align: center; }
+        .loader p { font-size: 16px; color: #a1a1aa; margin-top: 16px; }
         a { color: #3b82f6; }
-        .section { margin-bottom: 24px; }
-        code { background: #27272a; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
-        hr { border: none; border-top: 1px solid #27272a; margin: 40px 0; }
     </style>
+    <script>
+        (function() {
+            var lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+            var target = (lang.startsWith('ru')) ? 'support-ru.html' : 'support-en.html';
+            window.location.replace(target);
+        })();
+    </script>
 </head>
 <body>
-
-<h1>Поддержка / Support</h1>
-
-<div class="section">
-<h2>Сообщить о проблеме</h2>
-<p>Если вы нашли ошибку или у вас есть предложение, создайте issue на GitHub:</p>
-<p><a href="https://github.com/reg2005/langSwitcher/issues">github.com/reg2005/langSwitcher/issues</a></p>
-</div>
-
-<div class="section">
-<h2>Часто задаваемые вопросы</h2>
-
-<p><strong>Приложение не конвертирует текст</strong></p>
-<p>Убедитесь, что вы выдали разрешение Accessibility: Системные настройки → Конфиденциальность и безопасность → Универсальный доступ → LangSwitcher.</p>
-
-<p><strong>macOS говорит «приложение повреждено»</strong></p>
-<p>Выполните в Терминале: <code>xattr -cr /Applications/LangSwitcher.app</code></p>
-
-<p><strong>Как изменить горячую клавишу?</strong></p>
-<p>Откройте настройки LangSwitcher (клик по иконке в меню-баре → Настройки → вкладка «Горячая клавиша»).</p>
-
-<p><strong>Какие раскладки поддерживаются?</strong></p>
-<p>Английская, русская, украинская, немецкая, французская, испанская.</p>
-</div>
-
-<hr>
-
-<div class="section">
-<h2>Report an Issue</h2>
-<p>If you found a bug or have a suggestion, please open an issue on GitHub:</p>
-<p><a href="https://github.com/reg2005/langSwitcher/issues">github.com/reg2005/langSwitcher/issues</a></p>
-</div>
-
-<div class="section">
-<h2>FAQ</h2>
-
-<p><strong>The app doesn't convert text</strong></p>
-<p>Make sure you granted Accessibility permission: System Settings → Privacy & Security → Accessibility → LangSwitcher.</p>
-
-<p><strong>macOS says the app is "damaged"</strong></p>
-<p>Run in Terminal: <code>xattr -cr /Applications/LangSwitcher.app</code></p>
-
-<p><strong>How to change the hotkey?</strong></p>
-<p>Open LangSwitcher settings (click the menu bar icon → Settings → Hotkey tab).</p>
-
-<p><strong>Which keyboard layouts are supported?</strong></p>
-<p>English, Russian, Ukrainian, German, French, Spanish.</p>
-</div>
-
+    <div class="loader">
+        <p>Redirecting&hellip; <a href="support-en.html">English</a> | <a href="support-ru.html">Русский</a></p>
+    </div>
 </body>
 </html>

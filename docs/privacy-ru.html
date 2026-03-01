@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Политика конфиденциальности — LangSwitcher</title>
+    <meta name="description" content="Политика конфиденциальности LangSwitcher. Никакого сбора данных, аналитики и сетевых запросов. Весь текст обрабатывается локально на вашем Mac.">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --border: #262626;
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6;
+            --accent-soft: #1d4ed8;
+            --green: #22c55e;
+            --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100; padding: 16px 0;
+        }
+        nav .container { display: flex; justify-content: space-between; align-items: center; max-width: 960px; }
+        .logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .logo-icon { font-size: 24px; }
+        .nav-links { display: flex; gap: 24px; list-style: none; align-items: center; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .lang-switch { padding: 4px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
+        .lang-switch:hover { border-color: #444; color: var(--text); }
+
+        /* Content */
+        .page-header { padding: 140px 0 48px; text-align: center; }
+        .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .page-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-header .effective { font-size: 14px; color: var(--text-secondary); }
+
+        .content { padding-bottom: 80px; }
+        .content h2 { font-size: 24px; font-weight: 700; margin: 48px 0 16px; letter-spacing: -0.01em; }
+        .content h2:first-of-type { margin-top: 0; }
+        .content p { font-size: 16px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.7; }
+        .content ul { list-style: none; margin-bottom: 16px; padding: 0; }
+        .content ul li { font-size: 16px; color: var(--text-secondary); padding: 6px 0 6px 24px; position: relative; line-height: 1.7; }
+        .content ul li::before { content: ""; position: absolute; left: 0; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+        .content a { color: var(--accent); text-decoration: none; }
+        .content a:hover { text-decoration: underline; }
+
+        .highlight-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 24px; margin: 24px 0;
+        }
+        .highlight-box p { margin-bottom: 0; }
+        .highlight-box .icon { font-size: 24px; margin-bottom: 8px; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 48px 0; text-align: center; }
+        footer .container { max-width: 960px; }
+        footer p { color: var(--text-secondary); font-size: 14px; }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a { margin: 0 12px; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 28px; }
+            .nav-links { display: none; }
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .page-header, .content { animation: fadeInUp 0.6s ease-out; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="ru.html" class="logo"><span class="logo-icon">&#x2328;</span> LangSwitcher</a>
+        <ul class="nav-links">
+            <li><a href="ru.html">Главная</a></li>
+            <li><a href="support-ru.html">Поддержка</a></li>
+            <li><a href="https://github.com/reg2005/langSwitcher">GitHub</a></li>
+            <li><a href="privacy-en.html" class="lang-switch">EN</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1><span>Политика конфиденциальности</span></h1>
+        <p class="effective">Дата вступления в силу: 1 марта 2026 г.</p>
+    </div>
+
+    <div class="content">
+        <div class="highlight-box">
+            <div class="icon">&#x1F512;</div>
+            <p><strong>Коротко:</strong> LangSwitcher не собирает, не передаёт и не распространяет ваши данные. Вся обработка текста происходит исключительно на вашем Mac. Никакой аналитики, телеметрии и сетевых запросов.</p>
+        </div>
+
+        <h2>1. Сбор данных</h2>
+        <p>LangSwitcher <strong>не собирает</strong> никаких персональных данных. А именно:</p>
+        <ul>
+            <li>Набранный или преобразованный текст никуда не отправляется</li>
+            <li>Аналитика использования и телеметрия не собираются</li>
+            <li>Отчёты о сбоях не отправляются автоматически</li>
+            <li>Никаких cookies, идентификаторов или любого отслеживания</li>
+            <li>Приложение не делает <strong>ни одного сетевого запроса</strong></li>
+        </ul>
+
+        <h2>2. Обработка текста</h2>
+        <p>При нажатии горячей клавиши LangSwitcher считывает выделенный (или автоматически определённый) текст из текущего приложения через macOS Accessibility API. Текст преобразуется между раскладками клавиатуры с помощью чисто алгоритмического, локального вычисления. Преобразованный текст вставляется обратно через системный буфер обмена. Текст ни на каком этапе не покидает ваш Mac.</p>
+
+        <h2>3. Журнал преобразований</h2>
+        <p>LangSwitcher включает опциональный журнал преобразований для просмотра и оценки качества. Этот журнал:</p>
+        <ul>
+            <li>Хранится в <strong>локальной базе данных SQLite</strong> только на вашем Mac</li>
+            <li>Никуда не передаётся и не синхронизируется</li>
+            <li>Полностью под вашим контролем — вы можете просматривать, экспортировать (JSON) или удалять записи в любое время через Настройки</li>
+            <li>Ведение журнала можно <strong>полностью отключить</strong> в Настройках</li>
+        </ul>
+
+        <h2>4. Разрешение Accessibility</h2>
+        <p>LangSwitcher требует разрешение macOS Accessibility для работы. Это разрешение используется исключительно для:</p>
+        <ul>
+            <li>Чтения выделенного текста из активного приложения (через <code>AXUIElement</code>)</li>
+            <li>Симуляции событий клавиатуры для выделения и замены текста (через <code>CGEvent</code>)</li>
+            <li>Определения текущей раскладки клавиатуры (через <code>TISCopyCurrentKeyboardInputSource</code>)</li>
+        </ul>
+        <p>Разрешение Accessibility <strong>никогда</strong> не используется для мониторинга набора текста, записи нажатий клавиш или доступа к каким-либо данным помимо необходимых для явно запрошенной вами операции преобразования.</p>
+
+        <h2>5. Сторонние сервисы</h2>
+        <p>LangSwitcher не использует <strong>никаких сторонних сервисов</strong>, SDK, аналитических фреймворков или внешних зависимостей. Приложение создано исключительно на системных фреймворках Apple (Swift, SwiftUI, AppKit, Carbon).</p>
+
+        <h2>6. Хранение данных</h2>
+        <p>LangSwitcher сохраняет только:</p>
+        <ul>
+            <li><strong>Пользовательские настройки</strong> (горячая клавиша, режим преобразования, язык) — в стандартном macOS <code>UserDefaults</code></li>
+            <li><strong>Журнал преобразований</strong> (если включён) — в локальном файле SQLite внутри sandbox-контейнера приложения</li>
+        </ul>
+        <p>Оба пункта полностью под вашим контролем и удаляются при деинсталляции приложения.</p>
+
+        <h2>7. Открытый исходный код</h2>
+        <p>LangSwitcher — проект с открытым исходным кодом под <a href="https://github.com/reg2005/langSwitcher/blob/main/LICENSE">лицензией MIT</a>. Вы можете проверить полный исходный код на <a href="https://github.com/reg2005/langSwitcher">GitHub</a>, чтобы убедиться в отсутствии сбора данных.</p>
+
+        <h2>8. Изменения в политике</h2>
+        <p>При обновлении данной политики конфиденциальности изменения будут опубликованы на этой странице с обновлённой датой вступления в силу. Поскольку приложение не делает сетевых запросов, уведомления внутри приложения не будет — проверяйте эту страницу или репозиторий на GitHub.</p>
+
+        <h2>9. Контакты</h2>
+        <p>Если у вас есть вопросы по данной политике конфиденциальности, откройте issue на <a href="https://github.com/reg2005/langSwitcher/issues">GitHub</a> или посетите <a href="support-ru.html">страницу поддержки</a>.</p>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-links">
+            <a href="ru.html">Главная</a>
+            <a href="support-ru.html">Поддержка</a>
+            <a href="https://github.com/reg2005/langSwitcher">GitHub</a>
+        </div>
+        <p>LangSwitcher — открытый код под <a href="https://github.com/reg2005/langSwitcher/blob/main/LICENSE">лицензией MIT</a>.</p>
+    </div>
+</footer>
+
+</body>
+</html>

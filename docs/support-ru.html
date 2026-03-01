@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поддержка — LangSwitcher</title>
+    <meta name="description" content="Страница поддержки LangSwitcher. Часто задаваемые вопросы, решение проблем и помощь.">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --border: #262626;
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6;
+            --accent-soft: #1d4ed8;
+            --green: #22c55e;
+            --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100; padding: 16px 0;
+        }
+        nav .container { display: flex; justify-content: space-between; align-items: center; max-width: 960px; }
+        .logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .logo-icon { font-size: 24px; }
+        .nav-links { display: flex; gap: 24px; list-style: none; align-items: center; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .lang-switch { padding: 4px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
+        .lang-switch:hover { border-color: #444; color: var(--text); }
+
+        /* Content */
+        .page-header { padding: 140px 0 48px; text-align: center; }
+        .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .page-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-header p { font-size: 18px; color: var(--text-secondary); }
+
+        .content { padding-bottom: 80px; }
+        .content h2 { font-size: 24px; font-weight: 700; margin: 48px 0 16px; letter-spacing: -0.01em; }
+        .content h2:first-of-type { margin-top: 0; }
+        .content p { font-size: 16px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.7; }
+        .content a { color: var(--accent); text-decoration: none; }
+        .content a:hover { text-decoration: underline; }
+        .content code { background: #1e1e1e; padding: 2px 8px; border-radius: 6px; font-size: 14px; font-family: 'SF Mono', 'JetBrains Mono', monospace; color: #e5e5e5; }
+        .content ol { margin-bottom: 16px; padding-left: 24px; }
+        .content ol li { font-size: 16px; color: var(--text-secondary); padding: 4px 0; line-height: 1.7; }
+
+        .faq-item {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 24px; margin: 16px 0;
+        }
+        .faq-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+        .faq-item p { margin-bottom: 0; }
+        .faq-item p + p { margin-top: 12px; }
+        .faq-item code { background: #1e1e1e; padding: 2px 8px; border-radius: 6px; font-size: 14px; font-family: 'SF Mono', 'JetBrains Mono', monospace; color: #e5e5e5; }
+        .faq-item ol { margin: 12px 0 0; padding-left: 24px; }
+        .faq-item ol li { font-size: 15px; color: var(--text-secondary); padding: 2px 0; line-height: 1.7; }
+
+        .contact-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 32px; margin: 32px 0; text-align: center;
+        }
+        .contact-box h3 { font-size: 20px; margin-bottom: 12px; }
+        .contact-box p { margin-bottom: 16px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-soft); transform: translateY(-1px); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 48px 0; text-align: center; }
+        footer .container { max-width: 960px; }
+        footer p { color: var(--text-secondary); font-size: 14px; }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a { margin: 0 12px; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 28px; }
+            .nav-links { display: none; }
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .page-header, .content { animation: fadeInUp 0.6s ease-out; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="ru.html" class="logo"><span class="logo-icon">&#x2328;</span> LangSwitcher</a>
+        <ul class="nav-links">
+            <li><a href="ru.html">Главная</a></li>
+            <li><a href="privacy-ru.html">Конфиденциальность</a></li>
+            <li><a href="https://github.com/reg2005/langSwitcher">GitHub</a></li>
+            <li><a href="support-en.html" class="lang-switch">EN</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1><span>Поддержка</span></h1>
+        <p>Часто задаваемые вопросы и помощь</p>
+    </div>
+
+    <div class="content">
+        <h2>FAQ</h2>
+
+        <div class="faq-item">
+            <h3>Зачем LangSwitcher нужно разрешение Accessibility?</h3>
+            <p>LangSwitcher использует macOS Accessibility API для чтения выделенного текста из активного приложения и вставки обратно преобразованного результата. Без этого разрешения приложение не может получить доступ к тексту в других программах. Такой же механизм используют многие текстовые утилиты для macOS.</p>
+            <p>Для включения: <strong>Системные настройки &rarr; Конфиденциальность и безопасность &rarr; Универсальный доступ</strong> &rarr; включите LangSwitcher.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>macOS говорит, что приложение &laquo;повреждено&raquo; и не может быть открыто</h3>
+            <p>Это происходит потому, что macOS помещает в карантин приложения, загруженные из интернета не через App Store. Чтобы исправить, откройте Терминал и выполните:</p>
+            <p><code>xattr -cr /Applications/LangSwitcher.app</code></p>
+            <p>Затем попробуйте открыть приложение снова. Это нужно сделать только один раз. Альтернативно, можно нажать правой кнопкой мыши на приложении и выбрать &laquo;Открыть&raquo;, чтобы обойти Gatekeeper.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Как изменить горячую клавишу?</h3>
+            <p>Откройте настройки LangSwitcher (нажмите на иконку в строке меню &rarr; Настройки), перейдите на вкладку <strong>Горячая клавиша</strong>. Вы можете:</p>
+            <ol>
+                <li>Использовать стандартный <strong>Двойной Shift</strong> (нажмите Shift дважды быстро)</li>
+                <li>Записать собственную горячую клавишу, нажав &laquo;Записать&raquo; и нажав желаемую комбинацию</li>
+            </ol>
+        </div>
+
+        <div class="faq-item">
+            <h3>Какие раскладки клавиатуры поддерживаются?</h3>
+            <p>LangSwitcher в настоящее время поддерживает 6 раскладок:</p>
+            <ol>
+                <li><strong>Английская</strong> (U.S. / ABC) &mdash; QWERTY</li>
+                <li><strong>Русская</strong> &mdash; ЙЦУКЕН</li>
+                <li><strong>Украинская</strong> &mdash; ЙЦУКЕН (UA)</li>
+                <li><strong>Немецкая</strong> &mdash; QWERTZ</li>
+                <li><strong>Французская</strong> &mdash; AZERTY</li>
+                <li><strong>Испанская</strong> &mdash; QWERTY (ES)</li>
+            </ol>
+            <p>Раскладки определяются автоматически из системных настроек клавиатуры. В будущих версиях будут добавлены новые раскладки.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Что такое умное преобразование (Smart Conversion)?</h3>
+            <p>Умное преобразование позволяет конвертировать текст без ручного выделения. Доступны три режима:</p>
+            <ol>
+                <li><strong>Жадная строка (Greedy Line)</strong> (по умолчанию) &mdash; автоматически выделяет до начала строки, находит, где начинается неправильная раскладка, и преобразует только нужную часть</li>
+                <li><strong>Последнее слово (Last Word)</strong> &mdash; преобразует только последнее набранное слово</li>
+                <li><strong>Отключено (Disabled)</strong> &mdash; работает только с явным выделением текста</li>
+            </ol>
+        </div>
+
+        <div class="faq-item">
+            <h3>Работает ли LangSwitcher без интернета?</h3>
+            <p>Да, полностью. LangSwitcher не делает ни одного сетевого запроса. Всё преобразование выполняется алгоритмически на вашем Mac. Подключение к интернету никогда не требуется.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Как экспортировать журнал преобразований?</h3>
+            <p>Откройте Настройки &rarr; вкладка <strong>Журнал</strong>. Нажмите кнопку &laquo;Экспорт JSON&raquo;. Журнал экспортируется в формате JSON, который можно использовать для анализа или обучения ML-моделей.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Результат преобразования неправильный</h3>
+            <p>Это может происходить, когда текст содержит символы из нескольких раскладок. Попробуйте:</p>
+            <ol>
+                <li>Вручную выделить конкретный текст для преобразования, затем нажать горячую клавишу</li>
+                <li>Переключить режим умного преобразования в Настройках (попробуйте &laquo;Последнее слово&raquo; или &laquo;Отключено&raquo;)</li>
+                <li>Проверить, что нужные раскладки клавиатуры включены в Системных настройках &rarr; Клавиатура &rarr; Источники ввода</li>
+            </ol>
+            <p>Если проблема сохраняется, пожалуйста, <a href="https://github.com/reg2005/langSwitcher/issues">сообщите о ней на GitHub</a> с исходным текстом и ожидаемым результатом.</p>
+        </div>
+
+        <h2>Помощь</h2>
+
+        <div class="contact-box">
+            <h3>Нашли ошибку или есть предложение?</h3>
+            <p>LangSwitcher — проект с открытым исходным кодом. Лучший способ получить помощь — открыть issue на GitHub.</p>
+            <a href="https://github.com/reg2005/langSwitcher/issues" class="btn btn-primary">Открыть Issue на GitHub</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-links">
+            <a href="ru.html">Главная</a>
+            <a href="privacy-ru.html">Конфиденциальность</a>
+            <a href="https://github.com/reg2005/langSwitcher">GitHub</a>
+        </div>
+        <p>LangSwitcher — открытый код под <a href="https://github.com/reg2005/langSwitcher/blob/main/LICENSE">лицензией MIT</a>.</p>
+    </div>
+</footer>
+
+</body>
+</html>
