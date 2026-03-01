@@ -21,13 +21,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      working-directory: docs
+      run: npm install
+
+    - name: Generate static site
+      working-directory: docs
+      run: npx nuxt generate --extend docus
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './docs'
+        path: 'docs/.output/public'
 
   deploy:
     environment:
