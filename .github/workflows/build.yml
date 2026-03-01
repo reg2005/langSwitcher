@@ -12,8 +12,35 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    outputs:
+      swift: ${{ steps.filter.outputs.swift }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check for Swift/Xcode changes
+      uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          swift:
+            - '**/*.swift'
+            - '**/*.xcodeproj/**'
+            - '**/*.xcworkspace/**'
+            - '**/*.xib'
+            - '**/*.storyboard'
+            - '**/*.plist'
+            - '**/*.entitlements'
+            - '**/*.xcconfig'
+            - '.github/workflows/build.yml'
+
   test:
     name: Run Tests
+    needs: changes
+    if: startsWith(github.ref, 'refs/tags/v') || needs.changes.outputs.swift == 'true'
     runs-on: macos-14
     steps:
     - name: Checkout
