@@ -46,7 +46,11 @@ Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher conve
   :::
 
 #right
-:video{autoplay loop playsinline muted src="/langSwitcher/langSwitch.mp4" style="width:100%;max-width:480px;border-radius:12px"}
+:::demo-video
+---
+src: /langSwitcher/langSwitch.mp4
+---
+:::
 ::
 
 ::u-page-section
