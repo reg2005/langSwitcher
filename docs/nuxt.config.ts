@@ -16,6 +16,9 @@ export default defineNuxtConfig({
   app: {
     baseURL: '/langSwitcher/',
   },
+  mcp: {
+    enabled: false,
+  },
   robots: {
     robotsTxt: false,
   },

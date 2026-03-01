@@ -46,9 +46,7 @@ orientation: horizontal
   :::
 
 #right
-<video autoplay loop playsinline muted style="width:100%;max-width:480px;border-radius:12px">
-  <source src="/langSwitcher/langSwitch.mp4" type="video/mp4">
-</video>
+:video{autoplay loop playsinline muted src="/langSwitcher/langSwitch.mp4" style="width:100%;max-width:480px;border-radius:12px"}
 ::
 
 ::u-page-section
