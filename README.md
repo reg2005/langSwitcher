@@ -12,6 +12,7 @@ An open-source alternative to [Caramba Switcher](https://caramba-switcher.com/ma
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-brightgreen.svg)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5-orange.svg)](https://swift.org/)
+[![Mentioned in Awesome](https://awesome.re/mentioned-badge.svg)](https://github.com/jaywcjlove/awesome-mac)
 
 > If you find LangSwitcher useful, consider [supporting the project](#donate) — any contribution is appreciated!
 

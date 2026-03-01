@@ -12,6 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-brightgreen.svg)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5-orange.svg)](https://swift.org/)
+[![Mentioned in Awesome](https://awesome.re/mentioned-badge.svg)](https://github.com/jaywcjlove/awesome-mac)
 
 > Если LangSwitcher вам полезен, поддержите проект — [задонатить](#пожертвования)! Любая помощь ценна!
 
