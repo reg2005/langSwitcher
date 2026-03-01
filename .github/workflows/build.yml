@@ -7,6 +7,10 @@ on:
   pull_request:
     branches: [ main ]
 
+# Minimal permissions by default (fixes CodeQL alerts #1-#4)
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run Tests
@@ -39,21 +43,22 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
+    # Signing only for repo owner pushes (not PRs, not forks)
     - name: Detect codesigning configuration
-      env:
-        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
       run: |
-        if [ -n "$HAS_CERT" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_CERT" ]; then
           echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
         else
           echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
         fi
-        if [ -n "$HAS_NOTARIZE" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_NOTARIZE" ]; then
           echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
         else
           echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
         fi
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
 
     - name: Setup codesigning keychain
       if: env.CODESIGN_ENABLED == 'true'
@@ -65,29 +70,24 @@ jobs:
         KEYCHAIN_NAME="build.keychain-db"
         echo "KEYCHAIN_NAME=$KEYCHAIN_NAME" >> $GITHUB_ENV
 
-        # Decode certificate
         echo "$CERTIFICATE_P12" | base64 --decode > certificate.p12
 
-        # Create temporary keychain
         security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
         security set-keychain-settings -lut 21600 "$KEYCHAIN_NAME"
         security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
 
-        # Import certificate into keychain
         security import certificate.p12 \
           -k "$KEYCHAIN_NAME" \
           -P "$CERTIFICATE_PASSWORD" \
           -T /usr/bin/codesign \
-          -T /usr/bin/security
+          -T /usr/bin/security \
+          -T /usr/bin/productbuild
 
-        # Allow codesign to access keychain without prompting
         security set-key-partition-list -S apple-tool:,apple:,codesign: \
           -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
 
-        # Add keychain to search list
         security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
 
-        # Clean up certificate file
         rm certificate.p12
 
         echo "CODESIGN_IDENTITY=${{ secrets.MACOS_SIGNING_IDENTITY }}" >> $GITHUB_ENV
@@ -150,24 +150,23 @@ jobs:
         VERSION="${GITHUB_REF_NAME:-dev}"
         VERSION="${VERSION#v}"
         DMG_NAME="LangSwitcher-${VERSION}-arm64.dmg"
-        
+
         mkdir -p dmg_contents
         cp -R "$APP_PATH" dmg_contents/
         ln -s /Applications dmg_contents/Applications
-        
+
         hdiutil create -volname "LangSwitcher" \
           -srcfolder dmg_contents \
           -ov -format UDZO \
           "$DMG_NAME"
-        
-        # Sign the DMG itself if Developer ID is available
+
         if [ "$CODESIGN_ENABLED" = "true" ]; then
           codesign --force -s "$CODESIGN_IDENTITY" "$DMG_NAME"
         fi
-        
+
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Create ZIP with ditto (preserves permissions)
+    - name: Create ZIP with ditto
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
         VERSION="${GITHUB_REF_NAME:-dev}"
@@ -187,14 +186,12 @@ jobs:
           --password "$APPLE_PASSWORD" \
           --team-id "$TEAM_ID" \
           --wait
-
-        echo "=== Stapling notarization ticket to DMG ==="
+        echo "=== Stapling notarization ticket ==="
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
       if: always() && env.CODESIGN_ENABLED == 'true'
-      run: |
-        security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
+      run: security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
     - name: Upload arm64 DMG
       uses: actions/upload-artifact@v4
@@ -222,20 +219,20 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
     - name: Detect codesigning configuration
-      env:
-        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
       run: |
-        if [ -n "$HAS_CERT" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_CERT" ]; then
           echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
         else
           echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
         fi
-        if [ -n "$HAS_NOTARIZE" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_NOTARIZE" ]; then
           echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
         else
           echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
         fi
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
 
     - name: Setup codesigning keychain
       if: env.CODESIGN_ENABLED == 'true'
@@ -254,7 +251,8 @@ jobs:
           -k "$KEYCHAIN_NAME" \
           -P "$CERTIFICATE_PASSWORD" \
           -T /usr/bin/codesign \
-          -T /usr/bin/security
+          -T /usr/bin/security \
+          -T /usr/bin/productbuild
         security set-key-partition-list -S apple-tool:,apple:,codesign: \
           -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
         security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
@@ -290,28 +288,12 @@ jobs:
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
         if [ "$CODESIGN_ENABLED" = "true" ]; then
-          echo "=== Signing with Developer ID ==="
-          codesign --force --options runtime --deep \
-            -s "$CODESIGN_IDENTITY" "$APP_PATH"
+          codesign --force --options runtime --deep -s "$CODESIGN_IDENTITY" "$APP_PATH"
         else
-          echo "=== Ad-hoc signing ==="
           codesign --force --deep -s - "$APP_PATH"
         fi
-        echo "=== Codesign verify ==="
         codesign -dvvv "$APP_PATH" 2>&1
-        echo "=== spctl assess ==="
         spctl --assess --type exec "$APP_PATH" 2>&1 || true
-
-    - name: Verify app bundle
-      run: |
-        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        echo "=== App bundle contents ==="
-        ls -la "$APP_PATH/Contents/"
-        ls -la "$APP_PATH/Contents/MacOS/"
-        echo "=== Binary info ==="
-        file "$APP_PATH/Contents/MacOS/LangSwitcher"
-        echo "=== Binary size ==="
-        du -sh "$APP_PATH"
 
     - name: Create DMG (x86_64)
       run: |
@@ -319,23 +301,20 @@ jobs:
         VERSION="${GITHUB_REF_NAME:-dev}"
         VERSION="${VERSION#v}"
         DMG_NAME="LangSwitcher-${VERSION}-x86_64.dmg"
-        
+
         mkdir -p dmg_contents
         cp -R "$APP_PATH" dmg_contents/
         ln -s /Applications dmg_contents/Applications
-        
+
         hdiutil create -volname "LangSwitcher" \
-          -srcfolder dmg_contents \
-          -ov -format UDZO \
-          "$DMG_NAME"
-        
+          -srcfolder dmg_contents -ov -format UDZO "$DMG_NAME"
+
         if [ "$CODESIGN_ENABLED" = "true" ]; then
           codesign --force -s "$CODESIGN_IDENTITY" "$DMG_NAME"
         fi
-        
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Create ZIP with ditto (preserves permissions)
+    - name: Create ZIP with ditto
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
         VERSION="${GITHUB_REF_NAME:-dev}"
@@ -349,20 +328,14 @@ jobs:
         APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
         TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
       run: |
-        echo "=== Submitting DMG for notarization ==="
         xcrun notarytool submit "$DMG_NAME" \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_PASSWORD" \
-          --team-id "$TEAM_ID" \
-          --wait
-
-        echo "=== Stapling notarization ticket to DMG ==="
+          --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
+          --team-id "$TEAM_ID" --wait
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
       if: always() && env.CODESIGN_ENABLED == 'true'
-      run: |
-        security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
+      run: security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
     - name: Upload x86_64 DMG
       uses: actions/upload-artifact@v4
@@ -390,20 +363,20 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
     - name: Detect codesigning configuration
-      env:
-        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
       run: |
-        if [ -n "$HAS_CERT" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_CERT" ]; then
           echo "CODESIGN_ENABLED=true" >> $GITHUB_ENV
         else
           echo "CODESIGN_ENABLED=false" >> $GITHUB_ENV
         fi
-        if [ -n "$HAS_NOTARIZE" ]; then
+        if [ "${{ github.event_name }}" != "pull_request" ] && [ -n "$HAS_NOTARIZE" ]; then
           echo "NOTARIZE_ENABLED=true" >> $GITHUB_ENV
         else
           echo "NOTARIZE_ENABLED=false" >> $GITHUB_ENV
         fi
+      env:
+        HAS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+        HAS_NOTARIZE: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
 
     - name: Setup codesigning keychain
       if: env.CODESIGN_ENABLED == 'true'
@@ -422,7 +395,8 @@ jobs:
           -k "$KEYCHAIN_NAME" \
           -P "$CERTIFICATE_PASSWORD" \
           -T /usr/bin/codesign \
-          -T /usr/bin/security
+          -T /usr/bin/security \
+          -T /usr/bin/productbuild
         security set-key-partition-list -S apple-tool:,apple:,codesign: \
           -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
         security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
@@ -458,28 +432,12 @@ jobs:
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
         if [ "$CODESIGN_ENABLED" = "true" ]; then
-          echo "=== Signing with Developer ID ==="
-          codesign --force --options runtime --deep \
-            -s "$CODESIGN_IDENTITY" "$APP_PATH"
+          codesign --force --options runtime --deep -s "$CODESIGN_IDENTITY" "$APP_PATH"
         else
-          echo "=== Ad-hoc signing ==="
           codesign --force --deep -s - "$APP_PATH"
         fi
-        echo "=== Codesign verify ==="
         codesign -dvvv "$APP_PATH" 2>&1
-        echo "=== spctl assess ==="
         spctl --assess --type exec "$APP_PATH" 2>&1 || true
-
-    - name: Verify app bundle
-      run: |
-        APP_PATH="build/Build/Products/Release/LangSwitcher.app"
-        echo "=== App bundle contents ==="
-        ls -la "$APP_PATH/Contents/"
-        ls -la "$APP_PATH/Contents/MacOS/"
-        echo "=== Binary info ==="
-        file "$APP_PATH/Contents/MacOS/LangSwitcher"
-        echo "=== Binary size ==="
-        du -sh "$APP_PATH"
 
     - name: Create DMG (universal)
       run: |
@@ -487,23 +445,20 @@ jobs:
         VERSION="${GITHUB_REF_NAME:-dev}"
         VERSION="${VERSION#v}"
         DMG_NAME="LangSwitcher-${VERSION}-universal.dmg"
-        
+
         mkdir -p dmg_contents
         cp -R "$APP_PATH" dmg_contents/
         ln -s /Applications dmg_contents/Applications
-        
+
         hdiutil create -volname "LangSwitcher" \
-          -srcfolder dmg_contents \
-          -ov -format UDZO \
-          "$DMG_NAME"
-        
+          -srcfolder dmg_contents -ov -format UDZO "$DMG_NAME"
+
         if [ "$CODESIGN_ENABLED" = "true" ]; then
           codesign --force -s "$CODESIGN_IDENTITY" "$DMG_NAME"
         fi
-        
         echo "DMG_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-    - name: Create ZIP with ditto (preserves permissions)
+    - name: Create ZIP with ditto
       run: |
         APP_PATH="build/Build/Products/Release/LangSwitcher.app"
         VERSION="${GITHUB_REF_NAME:-dev}"
@@ -517,20 +472,14 @@ jobs:
         APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
         TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
       run: |
-        echo "=== Submitting DMG for notarization ==="
         xcrun notarytool submit "$DMG_NAME" \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_PASSWORD" \
-          --team-id "$TEAM_ID" \
-          --wait
-
-        echo "=== Stapling notarization ticket to DMG ==="
+          --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
+          --team-id "$TEAM_ID" --wait
         xcrun stapler staple "$DMG_NAME"
 
     - name: Cleanup keychain
       if: always() && env.CODESIGN_ENABLED == 'true'
-      run: |
-        security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
+      run: security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 
     - name: Upload Universal DMG
       uses: actions/upload-artifact@v4
@@ -546,92 +495,120 @@ jobs:
         path: "*.zip"
         if-no-files-found: error
 
+  # ── Release: GitHub Release + TestFlight upload (tag pushes only) ──
   release:
     name: Create Release
     needs: [build-arm64, build-x86_64, build-universal]
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
 
     steps:
-    - name: Download arm64 DMG
+    - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
-        name: LangSwitcher-arm64-dmg
         path: release/
+        merge-multiple: false
 
-    - name: Download x86_64 DMG
-      uses: actions/download-artifact@v4
-      with:
-        name: LangSwitcher-x86_64-dmg
-        path: release/
+    - name: Flatten release directory
+      run: |
+        mkdir -p flat_release
+        find release -type f \( -name '*.dmg' -o -name '*.zip' \) -exec cp {} flat_release/ \;
+        echo "=== Release assets ==="
+        ls -la flat_release/
 
-    - name: Download Universal DMG
-      uses: actions/download-artifact@v4
-      with:
-        name: LangSwitcher-universal-dmg
-        path: release/
-
-    - name: Download arm64 ZIP
-      uses: actions/download-artifact@v4
-      with:
-        name: LangSwitcher-arm64-zip
-        path: release/
-
-    - name: Download x86_64 ZIP
-      uses: actions/download-artifact@v4
-      with:
-        name: LangSwitcher-x86_64-zip
-        path: release/
-
-    - name: Download Universal ZIP
-      uses: actions/download-artifact@v4
-      with:
-        name: LangSwitcher-universal-zip
-        path: release/
-
-    - name: Create Release
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         name: "LangSwitcher ${{ github.ref_name }}"
         body: |
           ## LangSwitcher ${{ github.ref_name }}
-          
+
           ### Downloads
-          
+
           | Architecture | DMG (recommended) | ZIP |
           |---|---|---|
           | **Apple Silicon** (M1/M2/M3/M4) | `LangSwitcher-*-arm64.dmg` | `LangSwitcher-*-arm64.zip` |
           | **Intel** (x86_64) | `LangSwitcher-*-x86_64.dmg` | `LangSwitcher-*-x86_64.zip` |
           | **Universal** (both) | `LangSwitcher-*-universal.dmg` | `LangSwitcher-*-universal.zip` |
-          
+
           ### Installation
-          
+
           **DMG (recommended):**
           1. Download the `.dmg` file for your Mac architecture
           2. Open the DMG and drag LangSwitcher to Applications
           3. Launch LangSwitcher from Applications
-          
+
           **ZIP:**
           1. Download the `.zip` file for your Mac architecture
           2. Double-click to extract `LangSwitcher.app`
           3. Drag to Applications
           4. If macOS says "damaged", run: `xattr -cr /Applications/LangSwitcher.app`
-          
+
           **After first launch:**
           - Grant **Accessibility** permission when prompted (System Settings -> Privacy & Security -> Accessibility)
           - Press **⇧⇧** (double Shift) to convert selected text
-          
-          ### What's New
-          - Smart Conversion modes (Greedy Line, Last Word, Disabled)
-          - Conversion Log with SQLite storage and data labeling (correct/incorrect)
-          - JSON export for training data
-          - Punctuation preservation during conversion
-          - 93 unit tests
-          
+
           ### Requirements
           - macOS 13.0 (Ventura) or later
         draft: false
         prerelease: false
-        files: release/*
+        files: flat_release/*
+
+    # ── TestFlight Upload (requires App Store Connect API Key) ──
+    - name: Detect TestFlight configuration
+      run: |
+        if [ -n "$HAS_ASC_KEY" ]; then
+          echo "TESTFLIGHT_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "TESTFLIGHT_ENABLED=false" >> $GITHUB_ENV
+          echo "ℹ️ TestFlight upload skipped — APPSTORE_API_KEY_ID secret not configured"
+        fi
+      env:
+        HAS_ASC_KEY: ${{ secrets.APPSTORE_API_KEY_ID }}
+
+    - name: Upload to TestFlight
+      if: env.TESTFLIGHT_ENABLED == 'true'
+      env:
+        ASC_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        ASC_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+        ASC_KEY_CONTENT: ${{ secrets.APPSTORE_API_KEY_P8 }}
+        INSTALLER_IDENTITY: ${{ secrets.MACOS_INSTALLER_IDENTITY }}
+      run: |
+        # Write API key to file
+        mkdir -p ~/.private_keys
+        echo "$ASC_KEY_CONTENT" > ~/.private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+        # Find the universal ZIP and extract the .app
+        UNIVERSAL_ZIP=$(ls flat_release/LangSwitcher-*-universal.zip)
+        mkdir -p /tmp/testflight_app
+        ditto -x -k "$UNIVERSAL_ZIP" /tmp/testflight_app/
+        APP_PATH=$(find /tmp/testflight_app -name "*.app" -maxdepth 2 | head -1)
+
+        echo "=== Creating .pkg for TestFlight ==="
+        VERSION="${GITHUB_REF_NAME#v}"
+        PKG_NAME="LangSwitcher-${VERSION}.pkg"
+
+        productbuild --component "$APP_PATH" /Applications \
+          --sign "$INSTALLER_IDENTITY" \
+          "$PKG_NAME" 2>/dev/null || \
+        productbuild --component "$APP_PATH" /Applications "$PKG_NAME"
+
+        echo "=== Validating with App Store Connect ==="
+        xcrun altool --validate-app \
+          --file "$PKG_NAME" \
+          --type macos \
+          --apiKey "$ASC_KEY_ID" \
+          --apiIssuer "$ASC_ISSUER_ID" \
+          2>&1 || echo "⚠️ Validation failed — check App Store Connect configuration"
+
+        echo "=== Uploading to TestFlight ==="
+        xcrun altool --upload-app \
+          --file "$PKG_NAME" \
+          --type macos \
+          --apiKey "$ASC_KEY_ID" \
+          --apiIssuer "$ASC_ISSUER_ID" \
+          2>&1
+
+        echo "✅ Uploaded to TestFlight. Check App Store Connect for processing status."
