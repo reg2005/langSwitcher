@@ -7,6 +7,7 @@ export default defineNuxtConfig({
       { code: 'en', name: 'English' },
       { code: 'ru', name: 'Русский' },
     ],
+    rootRedirect: 'en',
   },
   site: {
     name: 'LangSwitcher',
@@ -14,5 +15,14 @@ export default defineNuxtConfig({
   },
   app: {
     baseURL: '/langSwitcher/',
+  },
+  robots: {
+    robotsTxt: false,
+  },
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/', '/en', '/ru'],
+    },
   },
 })
