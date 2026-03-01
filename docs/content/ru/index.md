@@ -10,10 +10,10 @@ orientation: horizontal
 ---
 
 #title
-Исправьте текст одним нажатием
+Исправьте текст одним нажатием на macOS
 
 #description
-Набрали текст не в той раскладке? Нажмите **Shift** дважды — и LangSwitcher мгновенно его преобразует. Выделять текст не нужно — умное преобразование всё сделает сам.
+Набрали текст не в той раскладке? Нажмите **Shift** дважды — и LangSwitcher мгновенно его преобразует. Бесплатное приложение для macOS с открытым исходным кодом — выделять текст не нужно, умное преобразование всё сделает само.
 
 #links
   :::u-button
@@ -45,12 +45,19 @@ orientation: horizontal
   Задонатить
   :::
 
-#right
-:::demo-video
----
-src: /langSwitcher/langSwitch.mp4
----
-:::
+::
+
+::u-page-section
+#title
+Смотрите в действии
+
+#default
+  :::demo-video
+  ---
+  src: /langSwitcher/langSwitch.mp4
+  maxWidth: 640px
+  ---
+  :::
 ::
 
 ::u-page-section

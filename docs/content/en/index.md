@@ -10,10 +10,10 @@ orientation: horizontal
 ---
 
 #title
-Fix mistyped text in one keystroke
+Fix mistyped text in one keystroke on macOS
 
 #description
-Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher converts it instantly. No selection needed — Smart Conversion handles it.
+Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher converts it instantly. A free, open-source macOS menu bar app — no selection needed, Smart Conversion handles it.
 
 #links
   :::u-button
@@ -45,12 +45,19 @@ Typed in the wrong keyboard layout? Press **Shift** twice and LangSwitcher conve
   Donate
   :::
 
-#right
-:::demo-video
----
-src: /langSwitcher/langSwitch.mp4
----
-:::
+::
+
+::u-page-section
+#title
+See it in action
+
+#default
+  :::demo-video
+  ---
+  src: /langSwitcher/langSwitch.mp4
+  maxWidth: 640px
+  ---
+  :::
 ::
 
 ::u-page-section
