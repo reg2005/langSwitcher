@@ -6,9 +6,6 @@ export default defineAppConfig({
     title: 'LangSwitcher — Keyboard Layout Converter for macOS',
     description: 'Free, open-source keyboard layout text converter for macOS. Press a hotkey, get mistyped text converted instantly.',
   },
-  socials: {
-    github: 'https://github.com/reg2005/langSwitcher',
-  },
   github: {
     url: 'https://github.com/reg2005/langSwitcher',
     branch: 'main',
