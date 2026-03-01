@@ -1,6 +1,7 @@
 export default defineNuxtConfig({
   extends: ['docus'],
   modules: ['@nuxtjs/i18n'],
+  css: ['~/assets/css/overrides.css'],
   i18n: {
     defaultLocale: 'en',
     locales: [

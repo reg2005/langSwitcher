@@ -1,0 +1,19 @@
+/* Fix horizontal overflow on mobile caused by "Edit this page" / "Report an issue" links */
+@media (max-width: 640px) {
+  /* The separator + links row in page footer */
+  [data-slot="root"][data-orientation="horizontal"] > [data-slot="container"] {
+    flex-wrap: wrap;
+  }
+
+  /* The links container with "Edit this page or Report an issue" */
+  .flex.items-center.gap-2.text-sm.text-muted {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Remove nowrap from page title in separator */
+  .font-medium.text-default.flex.whitespace-nowrap {
+    white-space: normal;
+    text-align: center;
+  }
+}
