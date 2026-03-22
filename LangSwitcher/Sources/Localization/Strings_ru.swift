@@ -121,7 +121,7 @@ enum Strings_ru {
         // ── Окно «О программе» ──────────────────────────────────────
         "about.windowTitle":             "О программе LangSwitcher",
         "about.appName":                 "LangSwitcher",
-        "about.version":                 "Версия 1.0.0",
+        "about.version":                 "Версия 1.1.0",
         "about.tagline":                 "Конвертер раскладки клавиатуры для macOS с открытым кодом",
         "about.howToUse":                "Как использовать:",
         "about.step1":                   "Выделите текст, набранный не в той раскладке",
