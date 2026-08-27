@@ -264,15 +264,18 @@ struct HotkeySettingsTab: View {
             
             Divider()
             
-            // Double Shift toggle
-            Toggle(l10n.t("hotkey.useDoubleShift"), isOn: $settingsManager.useDoubleShift)
-                .toggleStyle(.switch)
-            
-            Text(l10n.t("hotkey.doubleShiftHint"))
+            Picker(l10n.t("hotkey.mode"), selection: $settingsManager.hotkeyMode) {
+                Text(l10n.t("hotkey.doubleShift")).tag(HotkeyMode.doubleShift)
+                Text(l10n.t("hotkey.doubleOption")).tag(HotkeyMode.doubleOption)
+                Text(l10n.t("hotkey.custom")).tag(HotkeyMode.custom)
+            }
+            .pickerStyle(.radioGroup)
+
+            Text(hotkeyModeHint)
                 .font(.caption)
                 .foregroundStyle(.secondary)
             
-            if !settingsManager.useDoubleShift {
+            if settingsManager.hotkeyMode == .custom {
                 Divider()
                 
                 Text(l10n.t("hotkey.customTitle"))
@@ -292,6 +295,17 @@ struct HotkeySettingsTab: View {
             Spacer()
         }
         .padding()
+    }
+
+    private var hotkeyModeHint: String {
+        switch settingsManager.hotkeyMode {
+        case .doubleShift:
+            return l10n.t("hotkey.doubleShiftHint")
+        case .doubleOption:
+            return l10n.t("hotkey.doubleOptionHint")
+        case .custom:
+            return l10n.t("hotkey.customHint")
+        }
     }
 }
 

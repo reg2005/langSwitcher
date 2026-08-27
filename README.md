@@ -35,7 +35,7 @@ https://github.com/reg2005/langSwitcher/raw/main/screenshots/langSwitch.mp4
   - **Disabled** — only works with explicit text selection
 - **Auto-detection** — automatically detects which layout the text was typed in
 - **System keyboard integration** — uses your installed system keyboard layouts
-- **Double Shift hotkey** — press `⇧⇧` (Shift twice quickly) to convert, or set a custom shortcut
+- **Double-modifier hotkey** — press `⇧⇧` or `⌥⌥` to convert, or set a custom shortcut
 - **Conversion Log** — optionally log conversions to a local SQLite database (disabled by default for privacy). Review and label entries (correct/incorrect) for future ML training
 - **JSON export** — export conversion logs for data analysis or model training
 - **Menu bar app** — lives quietly in your status bar, always ready
