@@ -144,7 +144,6 @@ final class HotkeyManager {
     ) {
         unregister()
         self.action = action
-        self.isDoubleShiftMode = false
         
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return }
