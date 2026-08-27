@@ -55,6 +55,22 @@ enum LayoutSwitchMode: Int, CaseIterable, Codable {
     }
 }
 
+// MARK: - Hotkey Mode
+
+enum HotkeyMode: Int, CaseIterable, Codable {
+    case doubleShift = 0
+    case doubleOption = 1
+    case custom = 2
+
+    var doubleTapModifier: DoubleTapModifier? {
+        switch self {
+        case .doubleShift: return .shift
+        case .doubleOption: return .option
+        case .custom: return nil
+        }
+    }
+}
+
 // MARK: - Settings Manager
 // Persists user preferences via UserDefaults
 
@@ -71,10 +87,9 @@ final class SettingsManager: ObservableObject {
         didSet { saveLayouts() }
     }
     
-    /// true = double-shift mode, false = regular modifier+key hotkey
-    @Published var useDoubleShift: Bool {
+    @Published var hotkeyMode: HotkeyMode {
         didSet {
-            defaults.set(useDoubleShift, forKey: Keys.useDoubleShift)
+            defaults.set(hotkeyMode.rawValue, forKey: Keys.hotkeyMode)
             NotificationCenter.default.post(name: .hotkeySettingsChanged, object: nil)
         }
     }
@@ -82,7 +97,7 @@ final class SettingsManager: ObservableObject {
     @Published var hotkeyKeyCode: UInt16 {
         didSet {
             defaults.set(Int(hotkeyKeyCode), forKey: Keys.hotkeyKeyCode)
-            if !useDoubleShift {
+            if hotkeyMode == .custom {
                 NotificationCenter.default.post(name: .hotkeySettingsChanged, object: nil)
             }
         }
@@ -91,7 +106,7 @@ final class SettingsManager: ObservableObject {
     @Published var hotkeyModifiers: UInt {
         didSet {
             defaults.set(hotkeyModifiers, forKey: Keys.hotkeyModifiers)
-            if !useDoubleShift {
+            if hotkeyMode == .custom {
                 NotificationCenter.default.post(name: .hotkeySettingsChanged, object: nil)
             }
         }
@@ -139,19 +154,24 @@ final class SettingsManager: ObservableObject {
     }
     
     var hotkeyDescription: String {
-        if useDoubleShift {
-            return "⇧⇧ (Double Shift)"
+        switch hotkeyMode {
+        case .doubleShift:
+            return "⇧⇧"
+        case .doubleOption:
+            return "⌥⌥"
+        case .custom:
+            let mods = HotkeyManager.modifierFlagsToString(hotkeyModifierFlags)
+            let key = HotkeyManager.keyCodeToString(hotkeyKeyCode)
+            return "\(mods)\(key)"
         }
-        let mods = HotkeyManager.modifierFlagsToString(hotkeyModifierFlags)
-        let key = HotkeyManager.keyCodeToString(hotkeyKeyCode)
-        return "\(mods)\(key)"
     }
     
     // MARK: - Keys
     
     private enum Keys {
         static let enabledLayouts = "enabledLayouts"
-        static let useDoubleShift = "useDoubleShift"
+        static let hotkeyMode = "hotkeyMode"
+        static let legacyUseDoubleShift = "useDoubleShift"
         static let hotkeyKeyCode = "hotkeyKeyCode"
         static let hotkeyModifiers = "hotkeyModifiers"
         static let launchAtLogin = "launchAtLogin"
@@ -167,9 +187,14 @@ final class SettingsManager: ObservableObject {
     // MARK: - Init
     
     private init() {
-        // Default: double-shift mode
-        let savedUseDoubleShift = defaults.object(forKey: Keys.useDoubleShift) as? Bool
-        self.useDoubleShift = savedUseDoubleShift ?? true  // Default ON
+        if let savedMode = defaults.object(forKey: Keys.hotkeyMode) as? Int {
+            self.hotkeyMode = HotkeyMode(rawValue: savedMode) ?? .doubleShift
+        } else if let legacyUseDoubleShift = defaults.object(forKey: Keys.legacyUseDoubleShift) as? Bool {
+            // Preserve the pre-1.2 choice when migrating from the old boolean setting.
+            self.hotkeyMode = legacyUseDoubleShift ? .doubleShift : .custom
+        } else {
+            self.hotkeyMode = .doubleShift
+        }
         
         // Fallback hotkey settings (Option+S) for regular mode
         let savedKeyCode = defaults.object(forKey: Keys.hotkeyKeyCode) as? Int

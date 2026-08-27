@@ -4,7 +4,77 @@ import Cocoa
 
 // MARK: - Hotkey Manager
 // Registers and manages global keyboard shortcuts
-// Supports both regular hotkeys (modifier+key) and double-tap modifier keys (e.g. double Shift)
+// Supports both regular hotkeys (modifier+key) and double-tap modifier keys
+
+enum DoubleTapModifier: Int, CaseIterable, Codable {
+    case shift = 0
+    case option = 1
+
+    var eventFlag: NSEvent.ModifierFlags {
+        switch self {
+        case .shift: return .shift
+        case .option: return .option
+        }
+    }
+}
+
+/// Pure state machine for recognizing two clean modifier taps.
+/// Kept separate from NSEvent monitoring so edge cases can be unit tested.
+struct DoubleTapModifierDetector {
+    let modifier: DoubleTapModifier
+    let maximumInterval: TimeInterval
+
+    private(set) var lastTapTime: TimeInterval?
+    private(set) var isModifierDownAlone = false
+
+    init(modifier: DoubleTapModifier, maximumInterval: TimeInterval = 0.4) {
+        self.modifier = modifier
+        self.maximumInterval = maximumInterval
+    }
+
+    mutating func handleModifierFlags(
+        _ flags: NSEvent.ModifierFlags,
+        at timestamp: TimeInterval
+    ) -> Bool {
+        let relevantFlags = flags.intersection(.deviceIndependentFlagsMask)
+        let targetFlag = modifier.eventFlag
+        let targetIsDown = relevantFlags.contains(targetFlag)
+        let targetIsDownAlone = targetIsDown && relevantFlags == targetFlag
+
+        if targetIsDownAlone && !isModifierDownAlone {
+            isModifierDownAlone = true
+            return false
+        }
+
+        if !targetIsDown && isModifierDownAlone {
+            isModifierDownAlone = false
+
+            if let previousTap = lastTapTime,
+               timestamp - previousTap <= maximumInterval {
+                lastTapTime = nil
+                return true
+            }
+
+            lastTapTime = timestamp
+            return false
+        }
+
+        if !targetIsDownAlone {
+            reset()
+        }
+
+        return false
+    }
+
+    mutating func handleOtherKeyDown() {
+        reset()
+    }
+
+    mutating func reset() {
+        lastTapTime = nil
+        isModifierDownAlone = false
+    }
+}
 
 final class HotkeyManager {
     
@@ -16,28 +86,28 @@ final class HotkeyManager {
     private var flagsGlobalMonitor: Any?
     private var flagsLocalMonitor: Any?
     
-    // Double-tap detection state
-    private var lastShiftPressTime: TimeInterval = 0
-    private var lastShiftWasRight: Bool? = nil
-    private var shiftWasAloneDown: Bool = false
+    private var doubleTapDetector: DoubleTapModifierDetector?
     
     // Configuration
-    private(set) var isDoubleShiftMode: Bool = false
-    private let doubleTapInterval: TimeInterval = 0.4 // 400ms between two Shift presses
+    private(set) var registeredDoubleTapModifier: DoubleTapModifier?
     
     deinit {
         unregister()
     }
     
-    // MARK: - Double Shift Registration
+    // MARK: - Double-Tap Modifier Registration
     
-    /// Register double-shift as the hotkey trigger
-    func registerDoubleShift(action: @escaping HotkeyAction) {
+    /// Register a double-tapped modifier as the hotkey trigger.
+    func registerDoubleTap(
+        modifier: DoubleTapModifier,
+        action: @escaping HotkeyAction
+    ) {
         unregister()
         self.action = action
-        self.isDoubleShiftMode = true
+        self.registeredDoubleTapModifier = modifier
+        self.doubleTapDetector = DoubleTapModifierDetector(modifier: modifier)
         
-        // Monitor flagsChanged events for Shift key detection
+        // Modifier-only presses arrive as flagsChanged events.
         flagsGlobalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event)
         }
@@ -47,43 +117,20 @@ final class HotkeyManager {
             return event
         }
         
-        // We also need to reset shift-alone tracking when any key is pressed
+        // A regular key between modifier taps invalidates the sequence.
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] _ in
-            self?.shiftWasAloneDown = false
+            self?.doubleTapDetector?.handleOtherKeyDown()
         }
         
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.shiftWasAloneDown = false
+            self?.doubleTapDetector?.handleOtherKeyDown()
             return event
         }
     }
     
     private func handleFlagsChanged(_ event: NSEvent) {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        let shiftDown = flags.contains(.shift)
-        // Only Shift pressed, no other modifiers
-        let onlyShift = shiftDown && !flags.contains(.command) && !flags.contains(.option) && !flags.contains(.control)
-        
-        if onlyShift && !shiftWasAloneDown {
-            // Shift just pressed down (alone)
-            shiftWasAloneDown = true
-        } else if !shiftDown && shiftWasAloneDown {
-            // Shift just released, and it was a "clean" press (no other keys pressed during)
-            shiftWasAloneDown = false
-            
-            let now = ProcessInfo.processInfo.systemUptime
-            let elapsed = now - lastShiftPressTime
-            
-            if elapsed < doubleTapInterval && lastShiftPressTime > 0 {
-                // Double Shift detected!
-                lastShiftPressTime = 0
-                action?()
-            } else {
-                lastShiftPressTime = now
-            }
-        } else if !onlyShift {
-            // Some other modifier involved — reset
-            shiftWasAloneDown = false
+        if doubleTapDetector?.handleModifierFlags(event.modifierFlags, at: event.timestamp) == true {
+            action?()
         }
     }
     
@@ -97,7 +144,6 @@ final class HotkeyManager {
     ) {
         unregister()
         self.action = action
-        self.isDoubleShiftMode = false
         
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return }
@@ -129,9 +175,8 @@ final class HotkeyManager {
         if let m = flagsGlobalMonitor { NSEvent.removeMonitor(m); flagsGlobalMonitor = nil }
         if let m = flagsLocalMonitor { NSEvent.removeMonitor(m); flagsLocalMonitor = nil }
         action = nil
-        isDoubleShiftMode = false
-        lastShiftPressTime = 0
-        shiftWasAloneDown = false
+        registeredDoubleTapModifier = nil
+        doubleTapDetector = nil
     }
     
     // MARK: - Display Helpers
