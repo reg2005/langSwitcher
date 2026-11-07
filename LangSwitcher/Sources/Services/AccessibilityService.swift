@@ -7,6 +7,14 @@ import ApplicationServices
 
 final class AccessibilityService {
     
+    /// Pending clipboard restore from the previous conversion (if any).
+    private var pendingRestore: DispatchWorkItem?
+    /// Clipboard snapshot that the pending restore is going to put back.
+    private var pendingSnapshot: [NSPasteboardItem]?
+    /// How long to wait after ⌘V before restoring the user's clipboard.
+    /// Electron/browsers/remote desktops may read the pasteboard 300ms+ later.
+    private let restoreDelay: TimeInterval = 1.0
+    
     /// Check if the app has accessibility permissions
     static var hasAccessibilityPermission: Bool {
         let trusted = AXIsProcessTrusted()
@@ -31,8 +39,9 @@ final class AccessibilityService {
         
         // Copy selected text (⌘C)
         pasteboard.clearContents()
+        let copyBase = pasteboard.changeCount
         simulateCopy()
-        usleep(150_000) // 150ms — give target app time to process ⌘C
+        waitForPasteboardChange(since: copyBase, timeout: 0.5)
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
@@ -52,13 +61,7 @@ final class AccessibilityService {
         NSLog("[LangSwitcher] getAndReplaceSelectedText: pasting converted text = '\(convertedText)'")
         
         // Paste converted text
-        pasteboard.clearContents()
-        pasteboard.setString(convertedText, forType: .string)
-        simulatePaste()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.restorePasteboard(savedContents)
-        }
+        pasteAndScheduleRestore(convertedText, saved: savedContents)
         
         return true
     }
@@ -80,8 +83,9 @@ final class AccessibilityService {
         
         // Copy the selection
         pasteboard.clearContents()
+        let copyBase = pasteboard.changeCount
         simulateCopy()
-        usleep(150_000) // 150ms
+        waitForPasteboardChange(since: copyBase, timeout: 0.5)
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
@@ -103,13 +107,7 @@ final class AccessibilityService {
         NSLog("[LangSwitcher] selectLineAndReplace: pasting = '\(convertedText)'")
         
         // Paste (replaces the entire selection from cursor to line start)
-        pasteboard.clearContents()
-        pasteboard.setString(convertedText, forType: .string)
-        simulatePaste()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.restorePasteboard(savedContents)
-        }
+        pasteAndScheduleRestore(convertedText, saved: savedContents)
         
         return true
     }
@@ -131,8 +129,9 @@ final class AccessibilityService {
         
         // Copy the selection
         pasteboard.clearContents()
+        let copyBase = pasteboard.changeCount
         simulateCopy()
-        usleep(150_000) // 150ms — give target app time to process ⌘C
+        waitForPasteboardChange(since: copyBase, timeout: 0.5)
         
         guard let selectedText = pasteboard.string(forType: .string),
               !selectedText.isEmpty else {
@@ -155,13 +154,7 @@ final class AccessibilityService {
         NSLog("[LangSwitcher] selectAndReplaceLastWord: pasting converted = '\(convertedText)'")
         
         // Paste converted text (replaces the selection)
-        pasteboard.clearContents()
-        pasteboard.setString(convertedText, forType: .string)
-        simulatePaste()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.restorePasteboard(savedContents)
-        }
+        pasteAndScheduleRestore(convertedText, saved: savedContents)
         
         return true
     }
@@ -224,23 +217,68 @@ final class AccessibilityService {
     
     // MARK: - Pasteboard Save/Restore
     
-    private func savePasteboard() -> [(String, NSPasteboard.PasteboardType)] {
+    /// Put converted text on the pasteboard, press ⌘V and restore the user's
+    /// clipboard later — but only if nobody changed the pasteboard meanwhile.
+    private func pasteAndScheduleRestore(_ text: String, saved: [NSPasteboardItem]) {
         let pasteboard = NSPasteboard.general
-        return pasteboard.pasteboardItems?.compactMap { item -> (String, NSPasteboard.PasteboardType)? in
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        let ourChangeCount = pasteboard.changeCount
+        simulatePaste()
+        
+        pendingSnapshot = saved
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.pendingRestore = nil
+            self.pendingSnapshot = nil
+            // The user (or another app) copied something new — don't clobber it.
+            guard NSPasteboard.general.changeCount == ourChangeCount else {
+                NSLog("[LangSwitcher] Pasteboard changed since paste, skipping restore")
+                return
+            }
+            self.restorePasteboard(saved)
+        }
+        pendingRestore = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + restoreDelay, execute: work)
+    }
+    
+    /// Poll until the target app has written to the pasteboard (⌘C processed).
+    private func waitForPasteboardChange(since base: Int, timeout: TimeInterval) {
+        let deadline = Date().addingTimeInterval(timeout)
+        while NSPasteboard.general.changeCount == base && Date() < deadline {
+            usleep(10_000)
+        }
+        // Small grace period: some apps write several types one after another.
+        usleep(20_000)
+    }
+    
+    /// Snapshot the user's clipboard (all items, all types, as raw data).
+    /// If a previous conversion hasn't restored the clipboard yet, the
+    /// pasteboard currently holds *our* converted text — so cancel that
+    /// restore and reuse its snapshot as the real original.
+    private func savePasteboard() -> [NSPasteboardItem] {
+        if let work = pendingRestore, let snapshot = pendingSnapshot {
+            work.cancel()
+            pendingRestore = nil
+            pendingSnapshot = nil
+            return snapshot
+        }
+        return NSPasteboard.general.pasteboardItems?.map { item in
+            let copy = NSPasteboardItem()
             for type in item.types {
-                if let data = item.string(forType: type) {
-                    return (data, type)
+                if let data = item.data(forType: type) {
+                    copy.setData(data, forType: type)
                 }
             }
-            return nil
+            return copy
         } ?? []
     }
     
-    private func restorePasteboard(_ items: [(String, NSPasteboard.PasteboardType)]) {
+    private func restorePasteboard(_ items: [NSPasteboardItem]) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        for (string, type) in items {
-            pasteboard.setString(string, forType: type)
+        if !items.isEmpty {
+            pasteboard.writeObjects(items)
         }
     }
 }
